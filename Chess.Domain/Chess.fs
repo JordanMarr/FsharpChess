@@ -6,10 +6,12 @@ module Entities =
     | White 
     | Black
 
-    type PawnInfo = { HasMoved: bool; }
+    type Pawn =
+    | NotMoved
+    | Moved
 
     type Rank = 
-    | Pawn of PawnInfo
+    | Pawn of Pawn
     | Rook 
     | Bishop 
     | Knight 
@@ -35,22 +37,22 @@ module UseCases =
 module Implementation =
     open Entities
 
-    let blackPawn = Some (Black, Pawn { HasMoved = false })
-    let whitePawn = Some (White, Pawn { HasMoved = false })
+    let blackPawn = Some (Black, Pawn NotMoved)
+    let whitePawn = Some (White, Pawn NotMoved)
     
     let initBoard : UseCases.InitBoard = fun () -> 
         let cell col row = col, row
         let has color rank = Some (color, rank)
 
         Map [
-                    (A,Eight), Some (Black,Rook); (B,Eight), Some(Black,Knight); cell C Eight, has Black Bishop; cell D Eight, has Black King; cell E Eight, has Black Queen; cell F Eight, has Black Bishop; cell G Eight, has Black Knight; cell H Eight, has Black Rook;
-                    cell A Seven, blackPawn; cell B Seven, blackPawn; cell C Seven, blackPawn; cell D Seven, blackPawn; cell E Seven, blackPawn; cell F Seven, blackPawn; cell G Seven, blackPawn; cell H Seven, blackPawn; 
-                    cell A Six, None; cell B Six, None; cell C Six, None; cell D Six, None; cell E Six, None; cell F Six, None; cell G Six, None; cell H Six, None;
-                    cell A Five, None; cell B Five, None; cell C Five, None; cell D Five, None; cell E Five, None; cell F Five, None; cell G Five, None; cell H Five, None;
-                    cell A Four, None; cell B Four, None; cell C Four, None; cell D Four, None; cell E Four, None; cell F Four, None; cell G Four, None; cell H Four, None;
-                    cell A Three, None; cell B Three, None; cell C Three, None; cell D Three, None; cell E Three, None; cell F Three, None; cell G Three, None; cell H Three, None;
-                    cell A Two, whitePawn; cell B Two, whitePawn; cell C Two, whitePawn; cell D Two, whitePawn; cell E Two, whitePawn; cell F Two, whitePawn; cell G Two, whitePawn; cell H Two, whitePawn; 
-                    cell A One, has White Rook; cell B One, has White Knight; cell C One, has White Bishop; cell D One, has White King; cell E One, has White Queen; cell F One, has White Bishop; cell G One, has White Knight; cell H One, has White Rook;
+                    (A,Eight), Some (Black,Rook); (B,Eight), Some(Black,Knight); (C,Eight), has Black Bishop; (D,Eight), has Black King; (E,Eight), has Black Queen; (F,Eight), has Black Bishop; (G,Eight), has Black Knight; (H,Eight), has Black Rook;
+                    (A,Seven),  blackPawn; (B,Seven), blackPawn; (C,Seven), blackPawn; (D,Seven), blackPawn; (E,Seven), blackPawn; (F,Seven), blackPawn; (G,Seven), blackPawn; (H,Seven), blackPawn; 
+                    (A,Six), None; (B,Six), None; (C,Six), None; (D,Six), None; (E,Six), None; (F,Six), None; (G,Six), None; (H,Six), None;
+                    (A,Five), None; (B,Five), None; (C,Five), None; (D,Five), None; (E,Five), None; (F,Five), None; (G,Five), None; (H,Five), None;
+                    (A,Four), None; (B,Four), None; (C,Four), None; (D,Four), None; (E,Four), None; (F,Four), None; (G,Four), None; (H,Four), None;
+                    (A,Three), None; (B,Three), None; (C,Three), None; (D,Three), None; (E,Three), None; (F,Three), None; (G,Three), None; (H,Three), None;
+                    (A,Two), whitePawn; (B,Two), whitePawn; (C,Two), whitePawn; (D,Two), whitePawn; (E,Two), whitePawn; (F,Two), whitePawn; (G,Two), whitePawn; (H,Two), whitePawn; 
+                    (A,One), has White Rook; (B,One), has White Knight; (C,One), has White Bishop; (D,One), has White King; (E,One), has White Queen; (F,One), has White Bishop; (G,One), has White Knight; (H,One), has White Rook;
         ]
     
     let getHorizDist (fromCol, fromRow) (toCol, toRow) =
@@ -70,7 +72,7 @@ module Implementation =
         let x = getHorizDist fromCell toCell
         let y = getVertDist fromCell toCell
 
-        let validatePawn pi (fromColor, fromRank) toPieceOption =
+        let validatePawn (fromColor: Color) (pawn: Pawn) toPieceOption =   
             match toPieceOption with
             | Some toPiece -> // Moving to an occupied cell
                 let (toColor, toRank) = toPiece
@@ -84,14 +86,15 @@ module Implementation =
                 | _ -> Invalid "Invalid move - can only capture an enemy piece"
             | None ->  // Moving to an empty cell
                 // Check for straight non-captures
-                match (fromColor, x, y, pi.HasMoved) with
+                match (fromColor, x, y, pawn) with
                 | (White, 0, 1, _) -> Valid         // can always move forward one space to an empty cell
-                | (White, 0, 2, false) -> Valid     // can move forward two spaces only if pawn has not yet moved
+                | (White, 0, 2, NotMoved) -> Valid     // can move forward two spaces only if pawn has not yet moved
                 | (Black, 0, -1, _) -> Valid        // can always move forward one space to an empty cell
-                | (Black, 0, -2, false) -> Valid    // can move forward two spaces only if pawn has not yet moved
+                | (Black, 0, -2, NotMoved) -> Valid    // can move forward two spaces only if pawn has not yet moved
                 | _ -> Invalid "Invalid move"
 
-        let validateKnight (fromColor, fromRank) toPieceOption =
+        let validateKnight fromPiece toPieceOption =
+            let (fromColor, fromRank) = fromPiece
             let isL = match (abs x, abs y) with | (1,2) -> true | (2,1) -> true | _ -> false
             if isL then
                 match toPieceOption with
@@ -169,7 +172,9 @@ module Implementation =
                 | King -> validateKing fromPiece toPiece
                 | Queen -> validateQueen fromPiece toPiece
                 | Knight -> validateKnight fromPiece toPiece
-                | Pawn pi -> validatePawn pi fromPiece toPiece
+                | Pawn p -> match p with
+                            | Moved -> validatePawn fromPieceColor p toPiece
+                            | NotMoved -> validatePawn fromPieceColor p toPiece
             else
                 Invalid "It is not your turn"
 
@@ -184,7 +189,7 @@ module Implementation =
             | Some (fromPieceColor,fromPieceRank) ->
                 match fromPieceRank with
                 | Pawn pi -> // If this is a pawn, set HasMoved = true
-                    (board.Add(toCell, Some (fromPieceColor,Pawn { HasMoved = true})).Add(fromCell, None), validationResult)
+                    (board.Add(toCell, Some (fromPieceColor,Pawn Moved)).Add(fromCell, None), validationResult)
                 | _ -> 
                     (board.Add(toCell, Some (fromPieceColor,fromPieceRank)).Add(fromCell, None), validationResult)
             | None ->
