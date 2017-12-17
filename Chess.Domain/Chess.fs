@@ -36,11 +36,10 @@ module UseCases =
 
 module Implementation =
     open Entities
-
-    let blackPawn = Some (Black, Pawn NotMoved)
-    let whitePawn = Some (White, Pawn NotMoved)
     
     let initBoard : UseCases.InitBoard = fun () -> 
+        let blackPawn = Some (Black, Pawn NotMoved)
+        let whitePawn = Some (White, Pawn NotMoved)
         let white rank = Some (White, rank)
         let black rank = Some (Black, rank)
 
