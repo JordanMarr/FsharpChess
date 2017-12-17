@@ -41,18 +41,18 @@ module Implementation =
     let whitePawn = Some (White, Pawn NotMoved)
     
     let initBoard : UseCases.InitBoard = fun () -> 
-        let cell col row = col, row
-        let has color rank = Some (color, rank)
+        let white rank = Some (White, rank)
+        let black rank = Some (Black, rank)
 
         Map [
-                    (A,Eight), Some (Black,Rook); (B,Eight), Some(Black,Knight); (C,Eight), has Black Bishop; (D,Eight), has Black King; (E,Eight), has Black Queen; (F,Eight), has Black Bishop; (G,Eight), has Black Knight; (H,Eight), has Black Rook;
+                    (A,Eight), black Rook; (B,Eight), black Knight; (C,Eight), black Bishop; (D,Eight), black King; (E,Eight), black Queen; (F,Eight), black Bishop; (G,Eight), black Knight; (H,Eight), black Rook;
                     (A,Seven),  blackPawn; (B,Seven), blackPawn; (C,Seven), blackPawn; (D,Seven), blackPawn; (E,Seven), blackPawn; (F,Seven), blackPawn; (G,Seven), blackPawn; (H,Seven), blackPawn; 
                     (A,Six), None; (B,Six), None; (C,Six), None; (D,Six), None; (E,Six), None; (F,Six), None; (G,Six), None; (H,Six), None;
                     (A,Five), None; (B,Five), None; (C,Five), None; (D,Five), None; (E,Five), None; (F,Five), None; (G,Five), None; (H,Five), None;
                     (A,Four), None; (B,Four), None; (C,Four), None; (D,Four), None; (E,Four), None; (F,Four), None; (G,Four), None; (H,Four), None;
                     (A,Three), None; (B,Three), None; (C,Three), None; (D,Three), None; (E,Three), None; (F,Three), None; (G,Three), None; (H,Three), None;
                     (A,Two), whitePawn; (B,Two), whitePawn; (C,Two), whitePawn; (D,Two), whitePawn; (E,Two), whitePawn; (F,Two), whitePawn; (G,Two), whitePawn; (H,Two), whitePawn; 
-                    (A,One), has White Rook; (B,One), has White Knight; (C,One), has White Bishop; (D,One), has White King; (E,One), has White Queen; (F,One), has White Bishop; (G,One), has White Knight; (H,One), has White Rook;
+                    (A,One), white Rook; (B,One), white Knight; (C,One), white Bishop; (D,One), white King; (E,One), white Queen; (F,One), white Bishop; (G,One), white Knight; (H,One), white Rook;
         ]
     
     let getHorizDist (fromCol, fromRow) (toCol, toRow) =
