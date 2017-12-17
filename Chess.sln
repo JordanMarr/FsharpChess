@@ -5,10 +5,6 @@ VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Chess.Domain", "Chess.Domain\Chess.Domain.fsproj", "{E2F18796-6DA8-45E4-A1A3-0DB4F80E2624}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.UnitTests", "Chess.UnitTests\Chess.UnitTests.csproj", "{CA51FEA5-5F50-4E5D-9C78-687F10F1EF1B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{25415D8A-3D77-405C-9011-90C5881BE0AF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.WpfUI", "Chess.WpfUI\Chess.WpfUI.csproj", "{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7}"
 EndProject
 Global
@@ -21,10 +17,6 @@ Global
 		{E2F18796-6DA8-45E4-A1A3-0DB4F80E2624}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2F18796-6DA8-45E4-A1A3-0DB4F80E2624}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2F18796-6DA8-45E4-A1A3-0DB4F80E2624}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CA51FEA5-5F50-4E5D-9C78-687F10F1EF1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CA51FEA5-5F50-4E5D-9C78-687F10F1EF1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CA51FEA5-5F50-4E5D-9C78-687F10F1EF1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CA51FEA5-5F50-4E5D-9C78-687F10F1EF1B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -32,8 +24,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{CA51FEA5-5F50-4E5D-9C78-687F10F1EF1B} = {25415D8A-3D77-405C-9011-90C5881BE0AF}
 	EndGlobalSection
 EndGlobal
