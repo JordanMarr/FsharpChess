@@ -172,9 +172,7 @@ module Implementation =
                 | King -> validateKing fromPiece toPiece
                 | Queen -> validateQueen fromPiece toPiece
                 | Knight -> validateKnight fromPiece toPiece
-                | Pawn p -> match p with
-                            | Moved -> validatePawn fromPieceColor p toPiece
-                            | NotMoved -> validatePawn fromPieceColor p toPiece
+                | Pawn p -> validatePawn fromPieceColor p toPiece
             else
                 Invalid "It is not your turn"
 
