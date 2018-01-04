@@ -199,7 +199,9 @@ module Implementation =
                 
     let updateBoard (board: Board) (move: ValidatedMoveFrom) : Board =
         let fromPiece, fromCell, toCell = move
-        board.Add(toCell, Some fromPiece).Add(fromCell, None)
+        board
+            .Add(fromCell, None)
+            .Add(toCell, Some fromPiece)
 
     let updateNextMoveColor color = 
         match color with
