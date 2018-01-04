@@ -215,5 +215,6 @@ module Implementation =
             let updatedBoard = updateBoard gameState.board validatedMove
             return {gameState with 
                         board = updatedBoard; 
+                        message = "";
                         nextMove = updateNextMoveColor(gameState.nextMove) }
         }

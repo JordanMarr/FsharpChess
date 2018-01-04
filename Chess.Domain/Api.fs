@@ -5,8 +5,6 @@ module Api =
     open Chess.MonadicDomain.Entities
 
     type CellDTO = { coord: string; isOccupied: bool; color: string; rank: string }
-
-    type GameStateDTO = { board: Board; cells: CellDTO[]; nextTurn: Color; message: string }
     
     // Helpers
     let listColumns = [A; B; C; D; E; F; G; H]
@@ -63,7 +61,7 @@ module Api =
             match moveResult with
             | Valid gs -> 
                 gameState <- gs
-                this.Message <- ""
+                this.Message <- gs.message
             | Invalid msg -> 
                 this.Message <- msg
             ()
