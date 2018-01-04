@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Chess.fs" />
+    <Compile Include="ChessMonadic.fs" />
     <Compile Include="Api.fs" />
     <None Include="Script.fsx" />
   </ItemGroup>
