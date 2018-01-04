@@ -1,12 +1,12 @@
-﻿namespace Chess.Domain
+﻿namespace Chess.MonadicDomain
 
 module Api = 
-    open Chess.Domain
-    open Chess.Domain.Entities
+    open Chess.MonadicDomain
+    open Chess.MonadicDomain.Entities
 
     type CellDTO = { coord: string; isOccupied: bool; color: string; rank: string }
 
-    type GameState = { board: Board; cells: CellDTO[]; nextTurn: Color; message: string }
+    type GameStateDTO = { board: Board; cells: CellDTO[]; nextTurn: Color; message: string }
     
     // Helpers
     let listColumns = [A; B; C; D; E; F; G; H]
@@ -48,29 +48,22 @@ module Api =
 
     type ChessApi() =
         
-        let initBoard() =
-            let board = Implementation.initBoard()
-            let cells = boardToCellsDto board |> List.toArray
-            { board = board; cells = cells; nextTurn = White; message = "" }
+        let mutable gameState = Implementation.initGame()
+        
+        member this.InitGame() = gameState <- Implementation.initGame()
 
-        let mutable gameState = initBoard()
-        member this.GameState with get() = gameState
+        member this.Cells with get() = boardToCellsDto gameState.board |> List.toArray
 
-        member this.InitBoard() = gameState <- initBoard()
+        member val Message = gameState.message with get,set
 
         member this.Move(fromCell: string, toCell: string) =
             let cell1 = deserializeCoord fromCell
             let cell2 = deserializeCoord toCell
-            let (board, validationResult) = Implementation.move(gameState.board, gameState.nextTurn, cell1, cell2)
-            let cells = boardToCellsDto board |> List.toArray 
-
-            gameState <- { 
-                board = board
-                cells = cells 
-                nextTurn =
-                    match (validationResult, gameState.nextTurn)  with
-                    | Valid, White -> Black
-                    | Valid, Black -> White
-                    | Invalid msg, _ -> gameState.nextTurn
-                message = match validationResult with | Valid -> "" | Invalid msg -> msg 
-            }
+            let moveResult = Implementation.doMove gameState (cell1,cell2)
+            match moveResult with
+            | Valid gs -> 
+                gameState <- gs
+                this.Message <- ""
+            | Invalid msg -> 
+                this.Message <- msg
+            ()

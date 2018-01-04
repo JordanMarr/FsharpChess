@@ -43,20 +43,20 @@ module Entities =
     (*
         USE CASES
     *)
-    type InitBoard = unit -> Board
+    type InitGame = unit -> GameState
     type Move = GameState -> AttemptedMove -> ValidationResult<GameState>
     
 
 module Implementation =
     open Entities
             
-    let initBoard : Entities.InitBoard = fun () -> 
+    let initGame : Entities.InitGame = fun () -> 
         let blackPawn = Some (Black, Pawn NotMoved)
         let whitePawn = Some (White, Pawn NotMoved)
         let white rank = Some (White, rank)
         let black rank = Some (Black, rank)
 
-        Map [
+        let board = Map [
             (A,Eight), black Rook; (B,Eight), black Knight; (C,Eight), black Bishop; (D,Eight), black King; (E,Eight), black Queen; (F,Eight), black Bishop; (G,Eight), black Knight; (H,Eight), black Rook;
             (A,Seven),  blackPawn; (B,Seven), blackPawn; (C,Seven), blackPawn; (D,Seven), blackPawn; (E,Seven), blackPawn; (F,Seven), blackPawn; (G,Seven), blackPawn; (H,Seven), blackPawn; 
             (A,Six), None; (B,Six), None; (C,Six), None; (D,Six), None; (E,Six), None; (F,Six), None; (G,Six), None; (H,Six), None;
@@ -66,6 +66,10 @@ module Implementation =
             (A,Two), whitePawn; (B,Two), whitePawn; (C,Two), whitePawn; (D,Two), whitePawn; (E,Two), whitePawn; (F,Two), whitePawn; (G,Two), whitePawn; (H,Two), whitePawn; 
             (A,One), white Rook; (B,One), white Knight; (C,One), white Bishop; (D,One), white King; (E,One), white Queen; (F,One), white Bishop; (G,One), white Knight; (H,One), white Rook;
         ]
+
+        {   board = board; 
+            nextMove = White; 
+            message = "Welcome to F# Chess!" }
 
     let validateMoveFrom (gameState: GameState) (move: AttemptedMove) : ValidationResult<ValidatedMoveFrom> =
         let fromCell, toCell = move
@@ -197,6 +201,11 @@ module Implementation =
         let fromPiece, fromCell, toCell = move
         board.Add(toCell, Some fromPiece).Add(fromCell, None)
 
+    let updateNextMoveColor color = 
+        match color with
+        | Black -> White
+        | White -> Black
+
     let validation = new ValidationBuilder()     
 
     let doMove : Entities.Move = fun (gameState: GameState) (move: AttemptedMove) ->
@@ -204,5 +213,7 @@ module Implementation =
             let! validatedFrom = validateMoveFrom gameState move
             let! validatedMove = validateMoveTo gameState validatedFrom
             let updatedBoard = updateBoard gameState.board validatedMove
-            return { gameState with board = updatedBoard }
+            return {gameState with 
+                        board = updatedBoard; 
+                        nextMove = updateNextMoveColor(gameState.nextMove) }
         }

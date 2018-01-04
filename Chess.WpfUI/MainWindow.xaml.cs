@@ -21,7 +21,7 @@ namespace Chess.WpfUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        Domain.Api.ChessApi _api;
+        MonadicDomain.Api.ChessApi _api;
         List<QueuedCell> _moveQueue;
 
 
@@ -29,7 +29,7 @@ namespace Chess.WpfUI
         {
             InitializeComponent();
 
-            _api = new Domain.Api.ChessApi();
+            _api = new MonadicDomain.Api.ChessApi();
             _moveQueue = new List<QueuedCell>();
         }
 
@@ -40,7 +40,7 @@ namespace Chess.WpfUI
 
         private void RefreshBoard()
         {
-            foreach (var cell in _api.GameState.cells)
+            foreach (var cell in _api.Cells)
             {
                 var border = (Border)FindName(cell.coord);
                 var button = border.Child as Button;
@@ -57,7 +57,7 @@ namespace Chess.WpfUI
                 }
             }
 
-            StatusMessage.Text = _api.GameState.message;
+            StatusMessage.Text = _api.Message;
         }
 
         private void Cell_Click(object sender, RoutedEventArgs e)
