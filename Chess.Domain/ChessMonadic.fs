@@ -1,7 +1,7 @@
-namespace Chess.Domain
+namespace Chess.MonadicDomain
 
 open System
-module Entities2 =
+module Entities =
     
     type Color = 
     | White 
@@ -47,10 +47,10 @@ module Entities2 =
     type Move = GameState -> AttemptedMove -> ValidationResult<GameState>
     
 
-module Implementation2 =
-    open Entities2
+module Implementation =
+    open Entities
             
-    let initBoard : Entities2.InitBoard = fun () -> 
+    let initBoard : Entities.InitBoard = fun () -> 
         let blackPawn = Some (Black, Pawn NotMoved)
         let whitePawn = Some (White, Pawn NotMoved)
         let white rank = Some (White, rank)
@@ -199,7 +199,7 @@ module Implementation2 =
 
     let validation = new ValidationBuilder()     
 
-    let doMove : Entities2.Move = fun (gameState: GameState) (move: AttemptedMove) ->
+    let doMove : Entities.Move = fun (gameState: GameState) (move: AttemptedMove) ->
         validation {
             let! validatedFrom = validateMoveFrom gameState move
             let! validatedMove = validateMoveTo gameState validatedFrom
