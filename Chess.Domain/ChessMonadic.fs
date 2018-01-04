@@ -31,7 +31,7 @@ module Entities =
     type ValidatedMoveFrom = Piece * Cell * Cell
     type ValidationResult<'T> = | Valid of 'T | Invalid of string
     
-    type ValidationBuilder() =
+    type WhileValidBuilder() =
         member this.Bind(v, f) =
             match v with
             | Valid t -> f t
@@ -199,23 +199,26 @@ module Implementation =
                 
     let updateBoard (board: Board) (move: ValidatedMoveFrom) : Board =
         let fromPiece, fromCell, toCell = move
-        board
-            .Add(fromCell, None)
-            .Add(toCell, Some fromPiece)
+        let fromPieceColor, fromPieceRank = fromPiece
+        match fromPieceRank with
+        | Pawn pi ->
+            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor,Pawn Moved))
+        | _ -> 
+            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor,fromPieceRank))
 
     let updateNextMoveColor color = 
         match color with
         | Black -> White
         | White -> Black
 
-    let validation = new ValidationBuilder()     
+    let whileValid = new WhileValidBuilder()     
 
-    let doMove : Entities.Move = fun (gameState: GameState) (move: AttemptedMove) ->
-        validation {
-            let! validatedFrom = validateMoveFrom gameState move
-            let! validatedMove = validateMoveTo gameState validatedFrom
-            let updatedBoard = updateBoard gameState.board validatedMove
-            return {gameState with 
+    let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->
+        whileValid {
+            let! validatedFromMove = validateMoveFrom gameState attemptedMove
+            let! validatedToMove = validateMoveTo gameState validatedFromMove
+            let updatedBoard = updateBoard gameState.board validatedToMove
+            return { gameState with 
                         board = updatedBoard; 
                         message = "";
                         nextMove = updateNextMoveColor(gameState.nextMove) }

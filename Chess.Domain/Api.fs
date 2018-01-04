@@ -57,7 +57,7 @@ module Api =
         member this.Move(fromCell: string, toCell: string) =
             let cell1 = deserializeCoord fromCell
             let cell2 = deserializeCoord toCell
-            let moveResult = Implementation.doMove gameState (cell1,cell2)
+            let moveResult = Implementation.move gameState (cell1,cell2)
             match moveResult with
             | Valid gs -> 
                 gameState <- gs
