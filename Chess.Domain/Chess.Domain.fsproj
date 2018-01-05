@@ -53,7 +53,6 @@
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Chess.fs" />
     <Compile Include="Api.fs" />
-    <None Include="Script.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
