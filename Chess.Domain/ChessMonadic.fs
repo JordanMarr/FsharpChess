@@ -86,7 +86,7 @@ module Implementation =
         match gameState.board.[toCell] with
         | Some (toColor, toRank) -> 
             if gameState.nextMove = toColor
-            then Invalid "Can not take friendly piece"
+            then Invalid "Can not take a friendly piece"
             else Valid move
         | None -> Valid move
         
@@ -108,27 +108,6 @@ module Implementation =
         let x = getHorizDist fromCell toCell
         let y = getVertDist fromCell toCell
         
-        let validatePawn (fromColor: Color) (pawn: Pawn) toPieceOption =   
-            match toPieceOption with
-            | Some toPiece -> // Moving to an occupied cell
-                let (toColor, toRank) = toPiece
-                let isEnemy = fromColor <> toColor
-                // Check for diagonal captures
-                match (fromColor, x, y, isEnemy) with
-                | (White, 1, 1, true) -> Valid move
-                | (White, -1, 1, true) -> Valid move
-                | (Black, 1, -1, true) -> Valid move
-                | (Black, -1, -1, true) -> Valid move
-                | _ -> Invalid "Invalid move - can only capture an enemy piece"
-            | None ->  // Moving to an empty cell
-                // Check for straight non-captures
-                match (fromColor, x, y, pawn) with
-                | (White, 0, 1, _) -> Valid move            // can always move forward one space to an empty cell
-                | (White, 0, 2, NotMoved) -> Valid move     // can move forward two spaces only if pawn has not yet moved
-                | (Black, 0, -1, _) -> Valid move           // can always move forward one space to an empty cell
-                | (Black, 0, -2, NotMoved) -> Valid move    // can move forward two spaces only if pawn has not yet moved
-                | _ -> Invalid "Invalid move"
-
         let validateKnight fromPiece toPieceOption =
             let isL = match (abs x, abs y) with | (1,2) -> true | (2,1) -> true | _ -> false
             if isL 
@@ -159,6 +138,25 @@ module Implementation =
             then Valid move
             else Invalid "Queen can only move diagonally, up, down, left or right"
         
+        let validatePawn (fromColor: Color) (pawn: Pawn) toPieceOption =   
+            match toPieceOption with
+            | Some toPiece -> // Moving to an occupied cell
+                // Check for diagonal captures
+                match (fromColor, x, y) with
+                | (White, 1, 1) -> Valid move
+                | (White, -1, 1) -> Valid move
+                | (Black, 1, -1) -> Valid move
+                | (Black, -1, -1) -> Valid move
+                | _ -> Invalid "Pawn can only capture moving one space diagonally"
+            | None ->  // Moving to an empty cell
+                // Check for straight non-captures
+                match (fromColor, x, y, pawn) with
+                | (White, 0, 1, _) -> Valid move            // can always move forward one space to an empty cell
+                | (White, 0, 2, NotMoved) -> Valid move     // can move forward two spaces only if pawn has not yet moved
+                | (Black, 0, -1, _) -> Valid move           // can always move forward one space to an empty cell
+                | (Black, 0, -2, NotMoved) -> Valid move    // can move forward two spaces only if pawn has not yet moved
+                | _ -> Invalid "Pawn can move forward one space (or two spaces on the first move)"
+
         let (fromPieceColor, fromPieceRank) = fromPiece
         let toPieceOpt = gameState.board.Item toCell
 
