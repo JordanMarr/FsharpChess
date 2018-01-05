@@ -31,7 +31,7 @@ module Entities =
     type ValidatedMoveFrom = Piece * Cell * Cell
     type ValidationResult<'T> = | Valid of 'T | Invalid of string
     
-    type WhileValidBuilder() =
+    type ValidationBuilder() =
         member this.Bind(v, f) =
             match v with
             | Valid t -> f t
@@ -44,9 +44,8 @@ module Entities =
         USE CASES
     *)
     type InitGame = unit -> GameState
-    type Move = GameState -> AttemptedMove -> ValidationResult<GameState>
+    type Move = GameState -> AttemptedMove -> GameState
     
-
 module Implementation =
     open Entities
             
@@ -182,16 +181,24 @@ module Implementation =
         | Black -> White
         | White -> Black
 
-    let whileValid = new WhileValidBuilder()     
+    let validation = new ValidationBuilder()     
 
-    let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->
-        whileValid {
+    let validateMove (gameState: GameState) (attemptedMove: AttemptedMove) =
+        validation {
             let! m1 = validateMoveFrom gameState attemptedMove
             let! m2 = validateNotFriendlyTarget gameState m1
             let! m3 = validateMoveTo gameState m2
-            let updatedBoard = updateBoard gameState.board m3
-            return { gameState with 
-                        board = updatedBoard; 
-                        message = "";
-                        nextMove = updateNextMoveColor(gameState.nextMove) }
+            return m3
         }
+
+    let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->        
+        let validatedMove = validateMove gameState attemptedMove        
+        match validatedMove with
+        | Valid move -> 
+            { gameState with 
+                        board = updateBoard gameState.board move
+                        nextMove = updateNextMoveColor(gameState.nextMove) 
+                        message = "" }
+        | Invalid msg ->
+            { gameState with message = msg }
+        

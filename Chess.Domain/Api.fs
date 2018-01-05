@@ -52,16 +52,10 @@ module Api =
 
         member this.Cells with get() = boardToCellsDto gameState.board |> List.toArray
 
-        member val Message = gameState.message with get,set
+        member this.Message with get() = gameState.message
 
         member this.Move(fromCell: string, toCell: string) =
             let cell1 = deserializeCoord fromCell
             let cell2 = deserializeCoord toCell
-            let moveResult = Implementation.move gameState (cell1,cell2)
-            match moveResult with
-            | Valid gs -> 
-                gameState <- gs
-                this.Message <- gs.message
-            | Invalid msg -> 
-                this.Message <- msg
+            gameState <- Implementation.move gameState (cell1,cell2)
             ()
