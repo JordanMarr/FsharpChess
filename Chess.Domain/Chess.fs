@@ -40,6 +40,12 @@ module Entities =
         member this.Return(x) =
             Valid x                     
 
+    // Alternative bind syntax
+    //let (>>=) v f =
+    //    match v with
+    //    | Valid t -> f t
+    //    | Invalid msg -> Invalid msg
+
     (*
         USE CASES
     *)
@@ -190,6 +196,13 @@ module Implementation =
             let! m3 = validateMoveTo gameState m2
             return m3
         }
+
+    // Alternative bind syntax
+    //let validateMove2 (gameState: GameState) (attemptedMove: AttemptedMove) =
+    //    attemptedMove
+    //    |>  validateMoveFrom gameState
+    //    >>= validateNotFriendlyTarget gameState
+    //    >>= validateMoveTo gameState
 
     let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->        
         let validatedMove = validateMove gameState attemptedMove        
