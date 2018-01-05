@@ -80,6 +80,15 @@ module Implementation =
             else Invalid "It's not your turn"
         | None -> 
             Invalid "No piece was selected to move"
+
+    let validateNotFriendlyTarget (gameState: GameState) (move: ValidatedMoveFrom) : ValidationResult<ValidatedMoveFrom> =
+        let fromPiece, fromCell, toCell = move
+        match gameState.board.[toCell] with
+        | Some (toColor, toRank) -> 
+            if gameState.nextMove = toColor
+            then Invalid "Can not take friendly piece"
+            else Valid move
+        | None -> Valid move
         
     let validateMoveTo (gameState: GameState) (move: ValidatedMoveFrom) =
         let fromPiece, fromCell, toCell = move
@@ -98,7 +107,7 @@ module Implementation =
                 
         let x = getHorizDist fromCell toCell
         let y = getVertDist fromCell toCell
-
+        
         let validatePawn (fromColor: Color) (pawn: Pawn) toPieceOption =   
             match toPieceOption with
             | Some toPiece -> // Moving to an occupied cell
@@ -114,77 +123,41 @@ module Implementation =
             | None ->  // Moving to an empty cell
                 // Check for straight non-captures
                 match (fromColor, x, y, pawn) with
-                | (White, 0, 1, _) -> Valid move         // can always move forward one space to an empty cell
+                | (White, 0, 1, _) -> Valid move            // can always move forward one space to an empty cell
                 | (White, 0, 2, NotMoved) -> Valid move     // can move forward two spaces only if pawn has not yet moved
-                | (Black, 0, -1, _) -> Valid move        // can always move forward one space to an empty cell
+                | (Black, 0, -1, _) -> Valid move           // can always move forward one space to an empty cell
                 | (Black, 0, -2, NotMoved) -> Valid move    // can move forward two spaces only if pawn has not yet moved
                 | _ -> Invalid "Invalid move"
 
         let validateKnight fromPiece toPieceOption =
-            let (fromColor, fromRank) = fromPiece
             let isL = match (abs x, abs y) with | (1,2) -> true | (2,1) -> true | _ -> false
-            if isL then
-                match toPieceOption with
-                | Some toPiece -> // Moving to an occupied cell
-                    let (toColor, toRank) = toPiece
-                    let isEnemy = fromColor <> toColor
-                    if isEnemy then Valid move else Invalid "Can only capture an enemy piece"
-                | None -> // Moving to an empty cell
-                    Valid move
-            else
-                Invalid "Knight can only move in an L pattern"
+            if isL 
+            then Valid move
+            else Invalid "Knight can only move in an L pattern"
 
         let validateRook (fromColor, fromRank) toPieceOption =
             let isUpDownLeftRight = (abs x > 0 && y = 0) || (x = 0 && abs y > 0)
-            if isUpDownLeftRight then
-                match toPieceOption with
-                | Some toPiece -> // Moving to an occupied cell
-                    let (toColor, toRank) = toPiece
-                    let isEnemy = fromColor <> toColor
-                    if isEnemy then Valid move else Invalid "Can only capture an enemy piece"
-                | None -> 
-                    Valid move
-            else
-                Invalid "Rook can only move up, down, left or right"
+            if isUpDownLeftRight 
+            then Valid move
+            else Invalid "Rook can only move up, down, left or right"
 
         let validateBishop (fromColor, fromRank) toPieceOption =
             let isDiag = (abs x = abs y)
-            if isDiag then
-                match toPieceOption with
-                | Some toPiece -> // Moving to an occupied cell
-                    let (toColor, toRank) = toPiece
-                    let isEnemy = fromColor <> toColor
-                    if isEnemy then Valid move else Invalid "Can only capture an enemy piece"
-                | None -> 
-                    Valid move
-            else
-                Invalid "Bishop can only move diagonally"
+            if isDiag 
+            then Valid move
+            else Invalid "Bishop can only move diagonally"
 
         let validateKing (fromColor, fromRank) toPieceOption =
             let isAnyDirectionOneSpace = (abs x = 1 || x = 0) && (abs y = 1 || y = 0)
-            if isAnyDirectionOneSpace then
-                match toPieceOption with
-                | Some toPiece -> // Moving to an occupied cell
-                    let (toColor, toRank) = toPiece
-                    let isEnemy = fromColor <> toColor
-                    if isEnemy then Valid move else Invalid "Can only capture an enemy piece"
-                | None -> 
-                    Valid move
-            else
-                Invalid "King can only move one space in any direction"
+            if isAnyDirectionOneSpace 
+            then Valid move
+            else Invalid "King can only move one space in any direction"
 
         let validateQueen (fromColor, fromRank) toPieceOption =
             let isAnyDirection = (abs x = abs y) || (abs x > 0 && y = 0) || (x = 0 && abs y > 0)
-            if isAnyDirection then
-                match toPieceOption with
-                | Some toPiece -> // Moving to an occupied cell
-                    let (toColor, toRank) = toPiece
-                    let isEnemy = fromColor <> toColor
-                    if isEnemy then Valid move else Invalid "Can only capture an enemy piece"
-                | None -> 
-                    Valid move
-            else
-                Invalid "Queen can only move diagonally, up, down, left or right"
+            if isAnyDirection 
+            then Valid move
+            else Invalid "Queen can only move diagonally, up, down, left or right"
         
         let (fromPieceColor, fromPieceRank) = fromPiece
         let toPieceOpt = gameState.board.Item toCell
@@ -215,9 +188,10 @@ module Implementation =
 
     let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->
         whileValid {
-            let! validatedFromMove = validateMoveFrom gameState attemptedMove
-            let! validatedToMove = validateMoveTo gameState validatedFromMove
-            let updatedBoard = updateBoard gameState.board validatedToMove
+            let! m1 = validateMoveFrom gameState attemptedMove
+            let! m2 = validateNotFriendlyTarget gameState m1
+            let! m3 = validateMoveTo gameState m2
+            let updatedBoard = updateBoard gameState.board m3
             return { gameState with 
                         board = updatedBoard; 
                         message = "";
