@@ -3,30 +3,15 @@ namespace Chess.Domain
 open System
 module Entities =
     
-    type Color = 
-    | White 
-    | Black
-
-    type Pawn =
-    | NotMoved
-    | Moved
-
-    type Rank = 
-    | Pawn of Pawn
-    | Rook 
-    | Bishop 
-    | Knight 
-    | Queen 
-    | King
-
-    type Piece = Color * Rank
-    
+    type Color = | White | Black
+    type Pawn = | NotMoved | Moved
+    type Rank = | Pawn of Pawn | Rook | Bishop | Knight | Queen | King
+    type Piece = Color * Rank    
     type Column = | A | B | C | D | E | F | G | H    
     type Row = | One | Two | Three | Four | Five | Six | Seven | Eight
     type Cell = Column * Row
     type Board = Map<Cell, Piece option>
     type GameState = { board: Board; nextMove: Color; message: string }
-
     type AttemptedMove = Cell * Cell
     type ValidatedMoveFrom = Piece * Cell * Cell
     type ValidationResult<'T> = | Valid of 'T | Invalid of string
@@ -214,4 +199,3 @@ module Implementation =
                         message = "" }
         | Invalid msg ->
             { gameState with message = msg }
-        
