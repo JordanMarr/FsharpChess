@@ -33,15 +33,7 @@ module Entities =
     
     let validation = new ValidationBuilder()     
     
-    // Alternative bind syntax
-    //let (>>=) v f =
-    //    match v with
-    //    | Valid t -> f t
-    //    | Invalid msg -> Invalid msg
-
-    (*
-        USE CASES
-    *)
+    (* USE CASES *)
     type InitGame = unit -> GameState
     type Move = GameState -> AttemptedMove -> GameState
     
@@ -54,16 +46,17 @@ module Implementation =
         let white rank = Some (White, rank)
         let black rank = Some (Black, rank)
 
-        let board = Map [
-            (A,Eight), black Rook; (B,Eight), black Knight; (C,Eight), black Bishop; (D,Eight), black King; (E,Eight), black Queen; (F,Eight), black Bishop; (G,Eight), black Knight; (H,Eight), black Rook;
-            (A,Seven),  blackPawn; (B,Seven), blackPawn; (C,Seven), blackPawn; (D,Seven), blackPawn; (E,Seven), blackPawn; (F,Seven), blackPawn; (G,Seven), blackPawn; (H,Seven), blackPawn; 
-            (A,Six), None; (B,Six), None; (C,Six), None; (D,Six), None; (E,Six), None; (F,Six), None; (G,Six), None; (H,Six), None;
-            (A,Five), None; (B,Five), None; (C,Five), None; (D,Five), None; (E,Five), None; (F,Five), None; (G,Five), None; (H,Five), None;
-            (A,Four), None; (B,Four), None; (C,Four), None; (D,Four), None; (E,Four), None; (F,Four), None; (G,Four), None; (H,Four), None;
-            (A,Three), None; (B,Three), None; (C,Three), None; (D,Three), None; (E,Three), None; (F,Three), None; (G,Three), None; (H,Three), None;
-            (A,Two), whitePawn; (B,Two), whitePawn; (C,Two), whitePawn; (D,Two), whitePawn; (E,Two), whitePawn; (F,Two), whitePawn; (G,Two), whitePawn; (H,Two), whitePawn; 
-            (A,One), white Rook; (B,One), white Knight; (C,One), white Bishop; (D,One), white King; (E,One), white Queen; (F,One), white Bishop; (G,One), white Knight; (H,One), white Rook;
-        ]
+        let board = 
+            Map [
+                (A,Eight), black Rook; (B,Eight), black Knight; (C,Eight), black Bishop; (D,Eight), black King; (E,Eight), black Queen; (F,Eight), black Bishop; (G,Eight), black Knight; (H,Eight), black Rook;
+                (A,Seven),  blackPawn; (B,Seven), blackPawn; (C,Seven), blackPawn; (D,Seven), blackPawn; (E,Seven), blackPawn; (F,Seven), blackPawn; (G,Seven), blackPawn; (H,Seven), blackPawn; 
+                (A,Six), None; (B,Six), None; (C,Six), None; (D,Six), None; (E,Six), None; (F,Six), None; (G,Six), None; (H,Six), None;
+                (A,Five), None; (B,Five), None; (C,Five), None; (D,Five), None; (E,Five), None; (F,Five), None; (G,Five), None; (H,Five), None;
+                (A,Four), None; (B,Four), None; (C,Four), None; (D,Four), None; (E,Four), None; (F,Four), None; (G,Four), None; (H,Four), None;
+                (A,Three), None; (B,Three), None; (C,Three), None; (D,Three), None; (E,Three), None; (F,Three), None; (G,Three), None; (H,Three), None;
+                (A,Two), whitePawn; (B,Two), whitePawn; (C,Two), whitePawn; (D,Two), whitePawn; (E,Two), whitePawn; (F,Two), whitePawn; (G,Two), whitePawn; (H,Two), whitePawn; 
+                (A,One), white Rook; (B,One), white Knight; (C,One), white Bishop; (D,One), white King; (E,One), white Queen; (F,One), white Bishop; (G,One), white Knight; (H,One), white Rook;
+            ]
 
         {   board = board; 
             nextMove = White; 
@@ -109,7 +102,7 @@ module Implementation =
         let rowIdx = List.findIndex (fun r -> r = row) rows
         (colIdx, rowIdx)
         
-    let validateMoveTo (gameState: GameState) (move: ValidatedMoveFrom) =
+    let validateMoveShape (gameState: GameState) (move: ValidatedMoveFrom) =
         let fromPiece, fromCell, toCell = move
                 
         let x = getHorizDist fromCell toCell
@@ -229,7 +222,7 @@ module Implementation =
         validation {
             let! m1 = validateTurn gameState attemptedMove
             let! m2 = validateNotFriendlyTarget gameState m1
-            let! m3 = validateMoveTo gameState m2
+            let! m3 = validateMoveShape gameState m2
             let! m4 = validateNoInterposition gameState m3
             return m4
         }
