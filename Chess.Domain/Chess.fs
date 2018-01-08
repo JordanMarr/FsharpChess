@@ -9,8 +9,11 @@ module Entities =
     type Piece = Color * Rank    
     type Column = | A | B | C | D | E | F | G | H    
     type Row = | One | Two | Three | Four | Five | Six | Seven | Eight
+    let columns = [A;B;C;D;E;F;G;H]
+    let rows = [One; Two; Three; Four; Five; Six; Seven; Eight]
     type Cell = Column * Row
     type Board = Map<Cell, Piece option>
+    type GameProgress = | InProgress | WhiteWins | BlackWins
     type GameState = { board: Board; nextMove: Color; message: string }
     type AttemptedMove = Cell * Cell
     type ValidatedMoveFrom = Piece * Cell * Cell
@@ -25,6 +28,11 @@ module Entities =
         member this.Return(x) =
             Valid x                     
 
+        member this.ReturnFrom(x) =
+            x
+    
+    let validation = new ValidationBuilder()     
+    
     // Alternative bind syntax
     //let (>>=) v f =
     //    match v with
@@ -80,20 +88,29 @@ module Implementation =
             else Valid move
         | None -> Valid move
         
+    let getHorizDist (fromCol, fromRow) (toCol, toRow) =
+        let fromHorizIndex = List.findIndex (fun c -> c = fromCol) columns
+        let toHorizIndex = List.findIndex (fun c -> c = toCol) columns
+        toHorizIndex - fromHorizIndex
+
+    let getVertDist (fromCol, fromRow) (toCol, toRow) =
+        let fromVertIndex = List.findIndex (fun r -> r = fromRow) rows
+        let toVertIndex = List.findIndex (fun r -> r = toRow) rows
+        toVertIndex - fromVertIndex
+
+    let tryGetCell (colIdx,rowIdx) =
+        if colIdx < columns.Length && colIdx >= 0 && rowIdx < columns.Length && rowIdx >= 0
+        then Some (columns.[colIdx], rows.[rowIdx])
+        else None
+    
+    let toCoords (cell: Cell) = 
+        let col,row = cell
+        let colIdx = List.findIndex (fun c -> c = col) columns
+        let rowIdx = List.findIndex (fun r -> r = row) rows
+        (colIdx, rowIdx)
+        
     let validateMoveTo (gameState: GameState) (move: ValidatedMoveFrom) =
         let fromPiece, fromCell, toCell = move
-
-        let getHorizDist (fromCol, fromRow) (toCol, toRow) =
-            let columns = [A;B;C;D;E;F;G;H]
-            let fromHorizIndex = List.findIndex (fun c -> c = fromCol) columns
-            let toHorizIndex = List.findIndex (fun c -> c = toCol) columns
-            toHorizIndex - fromHorizIndex
-
-        let getVertDist (fromCol, fromRow) (toCol, toRow) =
-            let rows = [One; Two; Three; Four; Five; Six; Seven; Eight]
-            let fromVertIndex = List.findIndex (fun r -> r = fromRow) rows
-            let toVertIndex = List.findIndex (fun r -> r = toRow) rows
-            toVertIndex - fromVertIndex
                 
         let x = getHorizDist fromCell toCell
         let y = getVertDist fromCell toCell
@@ -171,9 +188,7 @@ module Implementation =
         match color with
         | Black -> White
         | White -> Black
-
-    let validation = new ValidationBuilder()     
-
+        
     let validateMove (gameState: GameState) (attemptedMove: AttemptedMove) =
         validation {
             let! m1 = validateMoveFrom gameState attemptedMove
@@ -189,9 +204,59 @@ module Implementation =
     //    >>= validateNotFriendlyTarget gameState
     //    >>= validateMoveTo gameState
 
-    let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->        
-        let validatedMove = validateMove gameState attemptedMove        
-        match validatedMove with
+    let validateNoInterposition (gameState: GameState) (move: ValidatedMoveFrom) =
+        let fromPiece, fromCell, toCell = move
+        let fromColor, fromRank = fromPiece
+        let fromCol, fromRow = fromCell
+
+        match fromRank with
+        | Knight -> Valid move
+        | _ -> 
+            let xDelta = getHorizDist fromCell toCell
+            let yDelta = getVertDist fromCell toCell
+
+            let normalize n = if n > 0 then 1 elif n < 0 then -1 else 0
+
+            let addVectors v1 v2 =
+                let v1x, v1y = v1
+                let v2x, v2y = v2
+                (v1x + v2x, v1y + v2y)
+            
+            let unitVector = (normalize xDelta, normalize yDelta)
+            let fromCoords = toCoords fromCell
+
+            let moveSeq start vector = seq {
+
+                let mutable nextCoord = start |> addVectors vector
+                let mutable nextCell = nextCoord |> tryGetCell
+
+                while nextCell.IsSome do
+                    yield nextCell.Value
+                    nextCoord <- nextCoord |> addVectors vector
+                    nextCell <- nextCoord |> tryGetCell
+            }
+        
+            let moves = moveSeq fromCoords unitVector 
+                        |> Seq.toArray
+        
+            let results = 
+                moves 
+                |> Array.map (fun m -> (fromCell, m))
+                |> Array.takeWhile (fun (fCell,tCell) -> tCell <> toCell)
+                |> Array.map (fun m -> validateMove gameState m)            
+            
+            if results |> Array.forall (fun result -> match result with | Valid _ -> true | _ -> false)
+            then Valid move
+            else Invalid "Invalid move"
+        
+
+    let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->                
+        let result = validation {
+            let! validatedMove = validateMove gameState attemptedMove
+            return! validateNoInterposition gameState validatedMove
+        }
+        
+        match result with
         | Valid move -> 
             { gameState with 
                         board = updateBoard gameState.board move
