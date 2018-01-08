@@ -69,7 +69,7 @@ module Implementation =
             nextMove = White; 
             message = "Welcome to F# Chess!" }
 
-    let validateMoveFrom (gameState: GameState) (move: AttemptedMove) : ValidationResult<ValidatedMoveFrom> =
+    let validateTurn (gameState: GameState) (move: AttemptedMove) : ValidationResult<ValidatedMoveFrom> =
         let fromCell, toCell = move
         match gameState.board.[fromCell] with
         | Some (fromColor, fromRank) -> 
@@ -103,7 +103,7 @@ module Implementation =
         then Some (columns.[colIdx], rows.[rowIdx])
         else None
     
-    let toCoords (cell: Cell) = 
+    let getCoords (cell: Cell) = 
         let col,row = cell
         let colIdx = List.findIndex (fun c -> c = col) columns
         let rowIdx = List.findIndex (fun r -> r = row) rows
@@ -174,36 +174,7 @@ module Implementation =
         | Queen -> validateQueen fromPiece toPieceOpt
         | Knight -> validateKnight fromPiece toPieceOpt
         | Pawn p -> validatePawn fromPieceColor p toPieceOpt
-                
-    let updateBoard (board: Board) (move: ValidatedMoveFrom) : Board =
-        let fromPiece, fromCell, toCell = move
-        let fromPieceColor, fromPieceRank = fromPiece
-        match fromPieceRank with
-        | Pawn pi ->
-            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor,Pawn Moved))
-        | _ -> 
-            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor,fromPieceRank))
-
-    let updateNextMoveColor color = 
-        match color with
-        | Black -> White
-        | White -> Black
-        
-    let validateMove (gameState: GameState) (attemptedMove: AttemptedMove) =
-        validation {
-            let! m1 = validateMoveFrom gameState attemptedMove
-            let! m2 = validateNotFriendlyTarget gameState m1
-            let! m3 = validateMoveTo gameState m2
-            return m3
-        }
-
-    // Alternative bind syntax
-    //let validateMove2 (gameState: GameState) (attemptedMove: AttemptedMove) =
-    //    attemptedMove
-    //    |>  validateMoveFrom gameState
-    //    >>= validateNotFriendlyTarget gameState
-    //    >>= validateMoveTo gameState
-
+    
     let validateNoInterposition (gameState: GameState) (move: ValidatedMoveFrom) =
         let fromPiece, fromCell, toCell = move
         let fromColor, fromRank = fromPiece
@@ -223,7 +194,7 @@ module Implementation =
                 (v1x + v2x, v1y + v2y)
             
             let unitVector = (normalize xDelta, normalize yDelta)
-            let fromCoords = toCoords fromCell
+            let fromCoords = getCoords fromCell
 
             let moveSeq start vector = seq {
 
@@ -237,26 +208,39 @@ module Implementation =
             }
         
             let moves = moveSeq fromCoords unitVector 
+                        |> Seq.takeWhile (fun move -> move <> toCell)
                         |> Seq.toArray
-        
-            let results = 
-                moves 
-                |> Array.map (fun m -> (fromCell, m))
-                |> Array.takeWhile (fun (fCell,tCell) -> tCell <> toCell)
-                |> Array.map (fun m -> validateMove gameState m)            
-            
-            if results |> Array.forall (fun result -> match result with | Valid _ -> true | _ -> false)
+
+            if moves |> Array.forall (fun move -> gameState.board.[move].IsNone)
             then Valid move
-            else Invalid "Invalid move"
+            else Invalid "Another piece is blocking this move"
+                    
+    let updateBoard (board: Board) (move: ValidatedMoveFrom) : Board =
+        let fromPiece, fromCell, toCell = move
+        let fromPieceColor, fromPieceRank = fromPiece
+        match fromPieceRank with
+        | Pawn pi ->
+            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor,Pawn Moved))
+        | _ -> 
+            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor,fromPieceRank))
+
+    let updateNextMoveColor color = 
+        match color with
+        | Black -> White
+        | White -> Black
         
+    let validateMove (gameState: GameState) (attemptedMove: AttemptedMove) =
+        validation {
+            let! m1 = validateTurn gameState attemptedMove
+            let! m2 = validateNotFriendlyTarget gameState m1
+            let! m3 = validateMoveTo gameState m2
+            let! m4 = validateNoInterposition gameState m3
+            return m4
+        }
 
     let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->                
-        let result = validation {
-            let! validatedMove = validateMove gameState attemptedMove
-            return! validateNoInterposition gameState validatedMove
-        }
-        
-        match result with
+        let validatedMove = validateMove gameState attemptedMove        
+        match validatedMove with
         | Valid move -> 
             { gameState with 
                         board = updateBoard gameState.board move
