@@ -175,6 +175,7 @@ module Implementation =
         | Knight -> validateKnight fromPiece toPieceOpt
         | Pawn p -> validatePawn fromPieceColor p toPieceOpt
     
+    
     let validateNoInterposition (gameState: GameState) (move: ValidatedMoveFrom) =
         let fromPiece, fromCell, toCell = move
         let fromColor, fromRank = fromPiece
@@ -187,17 +188,11 @@ module Implementation =
             let yDelta = getVertDist fromCell toCell
 
             let normalize n = if n > 0 then 1 elif n < 0 then -1 else 0
-
-            let addVectors v1 v2 =
-                let v1x, v1y = v1
-                let v2x, v2y = v2
-                (v1x + v2x, v1y + v2y)
-            
+            let addVectors v1 v2 = (fst v1 + fst v2, snd v1 + snd v2)
             let unitVector = (normalize xDelta, normalize yDelta)
             let fromCoords = getCoords fromCell
 
             let moveSeq start vector = seq {
-
                 let mutable nextCoord = start |> addVectors vector
                 let mutable nextCell = nextCoord |> tryGetCell
 
@@ -207,11 +202,12 @@ module Implementation =
                     nextCell <- nextCoord |> tryGetCell
             }
         
-            let moves = moveSeq fromCoords unitVector 
+            let valid = moveSeq fromCoords unitVector 
                         |> Seq.takeWhile (fun move -> move <> toCell)
                         |> Seq.toArray
-
-            if moves |> Array.forall (fun move -> gameState.board.[move].IsNone)
+                        |> Array.forall (fun move -> gameState.board.[move].IsNone)
+            
+            if valid
             then Valid move
             else Invalid "Another piece is blocking this move"
                     
