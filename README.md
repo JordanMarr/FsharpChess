@@ -18,7 +18,7 @@ The WPF UI is a very simple code-behind design (no MVVM here), because my purpos
 It creates an instance of the F# ChessApi class and it refreshes the UI after each move based on the newly generated game state.
 
 # TODO
-- [ ] Implement "interposition" (or "blocking") - all pieces that capture linearly (all except the knight) should not be able to skip past enemy pieces.  They should only be allowed the capture the first piece in their movement path.
+- [x] Implement "interposition" (or "blocking") - all pieces that capture linearly (all except the knight) should not be able to skip past enemy pieces.  They should only be allowed the capture the first piece in their movement path.
 - [ ] Implement GameProgress to handle "check" and "checkmate" (game over + victor) and "stalement" status
 - [ ] Create checkmate detection - engine needs to be able to detect when a move results in the other color's king having no valid escape moves
 - [ ] Implement "legal" move detection - a player cannot move their own king into danger
