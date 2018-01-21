@@ -1,8 +1,7 @@
 namespace Chess.Domain
-
 open System
-module Entities =
-    
+
+module Entities =    
     type Color = | White | Black
     type Pawn = | NotMoved | Moved
     type Rank = | Pawn of Pawn | Rook | Bishop | Knight | Queen | King
@@ -17,29 +16,15 @@ module Entities =
     type GameState = { board: Board; nextMove: Color; message: string }
     type AttemptedMove = Cell * Cell
     type ValidatedMoveFrom = Piece * Cell * Cell
-    type ValidationResult<'T> = | Valid of 'T | Invalid of string
-    
-    type ValidationBuilder() =
-        member this.Bind(v, f) =
-            match v with
-            | Valid t -> f t
-            | Invalid msg -> Invalid msg
-        
-        member this.Return(x) =
-            Valid x                     
-
-        member this.ReturnFrom(x) =
-            x
-    
-    let validation = new ValidationBuilder()     
     
     (* USE CASES *)
     type InitGame = unit -> GameState
     type Move = GameState -> AttemptedMove -> GameState
     
 module Implementation =
+    open Validation
     open Entities
-            
+
     let initGame : Entities.InitGame = fun () -> 
         let blackPawn = Some (Black, Pawn NotMoved)
         let whitePawn = Some (White, Pawn NotMoved)
@@ -219,13 +204,11 @@ module Implementation =
         | White -> Black
         
     let validateMove (gameState: GameState) (attemptedMove: AttemptedMove) =
-        validation {
-            let! m1 = validateTurn gameState attemptedMove
-            let! m2 = validateNotFriendlyTarget gameState m1
-            let! m3 = validateMoveShape gameState m2
-            let! m4 = validateNoInterposition gameState m3
-            return m4
-        }
+        attemptedMove
+        |> validateTurn gameState
+        >>= validateNotFriendlyTarget gameState
+        >>= validateMoveShape gameState
+        >>= validateNoInterposition gameState
 
     let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->                
         let validatedMove = validateMove gameState attemptedMove        

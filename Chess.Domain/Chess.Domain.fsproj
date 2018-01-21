@@ -51,6 +51,7 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Validation.fs" />
     <Compile Include="Chess.fs" />
     <Compile Include="Api.fs" />
   </ItemGroup>
