@@ -11,16 +11,9 @@ module Validation =
     let (>>=) = ValidationResult<_>.bind
 
     type ValidationBuilder() =
-        member this.Bind(v, f) =
-            match v with
-            | Valid t -> f t
-            | Invalid msg -> Invalid msg
-        
-        member this.Return(x) =
-            Valid x                     
-
-        member this.ReturnFrom(x) =
-            x
+        member this.Bind = ValidationResult<_>.bind
+        member this.Return(x) = Valid x
+        member this.ReturnFrom(x) = x
     
     let validation = new ValidationBuilder()     
     
