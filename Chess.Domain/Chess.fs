@@ -168,19 +168,20 @@ module Implementation =
             let normalize n = if n > 0 then 1 elif n < 0 then -1 else 0
             let addVectors v1 v2 = (fst v1 + fst v2, snd v1 + snd v2)
             let unitVector = (normalize xDelta, normalize yDelta)
-            let fromCoords = getCoords fromCell
 
-            let moveSeq start vector = seq {
-                let mutable nextCoord = start |> addVectors vector
-                let mutable nextCell = nextCoord |> tryGetCell
+            let rec moveSeq startCell vector = 
+                seq {
+                    let nextCell = startCell
+                                   |> getCoords
+                                   |> addVectors vector
+                                   |> tryGetCell
+                
+                    if nextCell.IsSome then
+                        yield nextCell.Value
+                        yield! moveSeq nextCell.Value vector
+                }    
 
-                while nextCell.IsSome do
-                    yield nextCell.Value
-                    nextCoord <- nextCoord |> addVectors vector
-                    nextCell <- nextCoord |> tryGetCell
-            }
-        
-            let valid = moveSeq fromCoords unitVector 
+            let valid = moveSeq fromCell unitVector 
                         |> Seq.takeWhile (fun move -> move <> toCell)
                         |> Seq.toArray
                         |> Array.forall (fun move -> gameState.board.[move].IsNone)
