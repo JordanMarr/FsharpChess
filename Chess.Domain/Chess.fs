@@ -183,8 +183,7 @@ module Implementation =
 
             let valid = moveSeq fromCell unitVector 
                         |> Seq.takeWhile (fun move -> move <> toCell)
-                        |> Seq.toArray
-                        |> Array.forall (fun move -> gameState.board.[move].IsNone)
+                        |> Seq.forall (fun move -> gameState.board.[move].IsNone)
             
             if valid
             then Ok move
