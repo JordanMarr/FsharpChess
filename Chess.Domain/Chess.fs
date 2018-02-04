@@ -3,8 +3,8 @@ open System
 
 module Entities =    
     type Color = | White | Black
-    type Pawn = | NotMoved | Moved
-    type Rank = | Pawn of Pawn | Rook | Bishop | Knight | Queen | King
+    type HasMoved = | NotMoved | Moved
+    type Rank = | Pawn of HasMoved | Rook | Bishop | Knight | Queen | King
     type Piece = Color * Rank    
     type Column = | A | B | C | D | E | F | G | H    
     type Row = | One | Two | Three | Four | Five | Six | Seven | Eight
@@ -17,15 +17,11 @@ module Entities =
     type AttemptedMove = Cell * Cell
     type ValidatedMoveFrom = Piece * Cell * Cell
     
-    (* USE CASES *)
-    type InitGame = unit -> GameState
-    type Move = GameState -> AttemptedMove -> GameState
-    
 module Implementation =
     open Validation
     open Entities
 
-    let initGame : Entities.InitGame = fun () -> 
+    let initGame () = 
         let blackPawn = Some (Black, Pawn NotMoved)
         let whitePawn = Some (White, Pawn NotMoved)
         let white rank = Some (White, rank)
@@ -47,7 +43,7 @@ module Implementation =
             nextMove = White; 
             message = "Welcome to F# Chess!" }
 
-    let validateTurn (gameState: GameState) (move: AttemptedMove) =
+    let validateTurn gameState move =
         let fromCell, toCell = move
         match gameState.board.[fromCell] with
         | Some (fromColor, fromRank) -> 
@@ -57,7 +53,7 @@ module Implementation =
         | None -> 
             Error "No piece was selected to move"
 
-    let validateNotFriendlyTarget (gameState: GameState) (move: ValidatedMoveFrom) =
+    let validateNotFriendlyTarget gameState move =
         let fromPiece, fromCell, toCell = move
         match gameState.board.[toCell] with
         | Some (toColor, toRank) -> 
@@ -81,53 +77,55 @@ module Implementation =
         then Some (columns.[colIdx], rows.[rowIdx])
         else None
     
-    let getCoords (cell: Cell) = 
+    let getCoords cell = 
         let col,row = cell
         let colIdx = List.findIndex (fun c -> c = col) columns
         let rowIdx = List.findIndex (fun r -> r = row) rows
         (colIdx, rowIdx)
         
-    let validateMoveShape (gameState: GameState) (move: ValidatedMoveFrom) =
+    let validateMoveShape gameState move : Result<ValidatedMoveFrom, string> =
         let fromPiece, fromCell, toCell = move
+        let (fromPieceColor, fromPieceRank) = fromPiece
+        let toPieceOpt = gameState.board.Item toCell
                 
         let xDelta = getHorizDist fromCell toCell
         let yDelta = getVertDist fromCell toCell
         
-        let validateKnight fromPiece toPieceOption =
+        let validateKnight () =
             let isL = match (abs xDelta, abs yDelta) with | (1,2) -> true | (2,1) -> true | _ -> false
             if isL 
             then Ok move
             else Error "Knight can only move in an L pattern"
 
-        let validateRook (fromColor, fromRank) toPieceOption =
+        let validateRook () =
             let isUpDownLeftRight = (abs xDelta > 0 && yDelta = 0) || (xDelta = 0 && abs yDelta > 0)
             if isUpDownLeftRight 
             then Ok move
             else Error "Rook can only move up, down, left or right"
 
-        let validateBishop (fromColor, fromRank) toPieceOption =
+        let validateBishop () =
             let isDiag = (abs xDelta = abs yDelta)
             if isDiag 
             then Ok move
             else Error "Bishop can only move diagonally"
 
-        let validateKing (fromColor, fromRank) toPieceOption =
+        let validateKing () =
             let isAnyDirectionOneSpace = (abs xDelta = 1 || xDelta = 0) && (abs yDelta = 1 || yDelta = 0)
             if isAnyDirectionOneSpace 
             then Ok move
             else Error "King can only move one space in any direction"
 
-        let validateQueen (fromColor, fromRank) toPieceOption =
+        let validateQueen () =
             let isAnyDirection = (abs xDelta = abs yDelta) || (abs xDelta > 0 && yDelta = 0) || (xDelta = 0 && abs yDelta > 0)
             if isAnyDirection 
             then Ok move
             else Error "Queen can only move diagonally, up, down, left or right"
         
-        let validatePawn (fromColor: Color) (pawn: Pawn) toPieceOption =   
-            match toPieceOption with
+        let validatePawn hasMoved =   
+            match toPieceOpt with
             | Some toPiece -> // Moving to an occupied cell
                 // Check for diagonal captures
-                match (fromColor, xDelta, yDelta) with
+                match (fromPieceColor, xDelta, yDelta) with
                 | (White, 1, 1) -> Ok move
                 | (White, -1, 1) -> Ok move
                 | (Black, 1, -1) -> Ok move
@@ -135,26 +133,22 @@ module Implementation =
                 | _ -> Error "Pawn can only capture moving one space diagonally"
             | None ->  // Moving to an empty cell
                 // Check for straight non-captures
-                match (fromColor, xDelta, yDelta, pawn) with
+                match (fromPieceColor, xDelta, yDelta, hasMoved) with
                 | (White, 0, 1, _) -> Ok move            // can always move forward one space to an empty cell
                 | (White, 0, 2, NotMoved) -> Ok move     // can move forward two spaces only if pawn has not yet moved
                 | (Black, 0, -1, _) -> Ok move           // can always move forward one space to an empty cell
                 | (Black, 0, -2, NotMoved) -> Ok move    // can move forward two spaces only if pawn has not yet moved
                 | _ -> Error "Pawn can move forward one space (or two spaces on the first move)"
 
-        let (fromPieceColor, fromPieceRank) = fromPiece
-        let toPieceOpt = gameState.board.Item toCell
-
         match fromPieceRank with
-        | Bishop -> validateBishop fromPiece toPieceOpt
-        | Rook -> validateRook fromPiece toPieceOpt
-        | King -> validateKing fromPiece toPieceOpt
-        | Queen -> validateQueen fromPiece toPieceOpt
-        | Knight -> validateKnight fromPiece toPieceOpt
-        | Pawn p -> validatePawn fromPieceColor p toPieceOpt
+        | Bishop -> validateBishop ()
+        | Rook -> validateRook ()
+        | King -> validateKing ()
+        | Queen -> validateQueen ()
+        | Knight -> validateKnight ()
+        | Pawn hasMoved -> validatePawn hasMoved    
     
-    
-    let validateNoInterposition (gameState: GameState) (move: ValidatedMoveFrom) =
+    let validateNoInterposition gameState move =
         let fromPiece, fromCell, toCell = move
         let fromColor, fromRank = fromPiece
         let fromCol, fromRow = fromCell
@@ -189,29 +183,29 @@ module Implementation =
             then Ok move
             else Error "Another piece is blocking this move"
                     
-    let updateBoard (board: Board) (move: ValidatedMoveFrom) : Board =
+    let updateBoard (board: Board) move =
         let fromPiece, fromCell, toCell = move
         let fromPieceColor, fromPieceRank = fromPiece
         match fromPieceRank with
         | Pawn pi ->
-            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor,Pawn Moved))
+            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor, Pawn Moved))
         | _ -> 
-            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor,fromPieceRank))
+            board.Add(fromCell, None).Add(toCell, Some (fromPieceColor, fromPieceRank))
 
     let updateNextMoveColor color = 
         match color with
         | Black -> White
         | White -> Black
         
-    let validateMove (gameState: GameState) (attemptedMove: AttemptedMove) =
+    let validateMove gameState attemptedMove =
         attemptedMove
         |> validateTurn gameState
         >>= validateNotFriendlyTarget gameState
         >>= validateMoveShape gameState
         >>= validateNoInterposition gameState
 
-    let move : Entities.Move = fun (gameState: GameState) (attemptedMove: AttemptedMove) ->                
-        let validatedMove = validateMove gameState attemptedMove        
+    let move gameState attemptedMove =
+        let validatedMove = validateMove gameState attemptedMove
         match validatedMove with
         | Ok move -> 
             { gameState with 
