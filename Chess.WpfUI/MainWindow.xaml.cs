@@ -21,7 +21,7 @@ namespace Chess.WpfUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        MonadicDomain.Api.ChessApi _api;
+        Api.ChessApi _api;
         List<QueuedCell> _moveQueue;
 
 
@@ -29,7 +29,7 @@ namespace Chess.WpfUI
         {
             InitializeComponent();
 
-            _api = new MonadicDomain.Api.ChessApi();
+            _api = new Api.ChessApi();
             _moveQueue = new List<QueuedCell>();
         }
 

@@ -1,7 +1,6 @@
-﻿namespace Chess.MonadicDomain
+﻿namespace Chess.Domain
 
 module Api = 
-    open Chess.Domain
     open Chess.Domain.Entities
 
     type CellDTO = { coord: string; isOccupied: bool; color: string; rank: string }
