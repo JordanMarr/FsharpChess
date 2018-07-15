@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.WpfUI", "Chess.WpfUI\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.ConsoleUI", "Chess.ConsoleUI\Chess.ConsoleUI.csproj", "{238B31E4-EFA3-4847-8466-348D70050D75}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{C352872B-5D72-4081-A29A-A8C86F5AB683}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,6 +32,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7} = {C352872B-5D72-4081-A29A-A8C86F5AB683}
+		{238B31E4-EFA3-4847-8466-348D70050D75} = {C352872B-5D72-4081-A29A-A8C86F5AB683}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {69C12E65-33D6-402A-90D6-D37AB418B7C0}
