@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Chess.Domain", "Chess.Domain\Chess.Domain.fsproj", "{E2F18796-6DA8-45E4-A1A3-0DB4F80E2624}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Chess.Domain", "Chess.Domain\Chess.Domain.fsproj", "{E2F18796-6DA8-45E4-A1A3-0DB4F80E2624}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.WpfUI", "Chess.WpfUI\Chess.WpfUI.csproj", "{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.ConsoleUI", "Chess.ConsoleUI\Chess.ConsoleUI.csproj", "{238B31E4-EFA3-4847-8466-348D70050D75}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{C352872B-5D72-4081-A29A-A8C86F5AB683}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chess.ConsoleUI", "Chess.ConsoleUI\Chess.ConsoleUI.csproj", "{227BA2EA-261C-4EAC-B9FE-F6E16A1AD5E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,17 +25,17 @@ Global
 		{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{238B31E4-EFA3-4847-8466-348D70050D75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{238B31E4-EFA3-4847-8466-348D70050D75}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{238B31E4-EFA3-4847-8466-348D70050D75}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{238B31E4-EFA3-4847-8466-348D70050D75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{227BA2EA-261C-4EAC-B9FE-F6E16A1AD5E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{227BA2EA-261C-4EAC-B9FE-F6E16A1AD5E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{227BA2EA-261C-4EAC-B9FE-F6E16A1AD5E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{227BA2EA-261C-4EAC-B9FE-F6E16A1AD5E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{039D0DC3-6D17-4409-8FC8-0BB427AD7DB7} = {C352872B-5D72-4081-A29A-A8C86F5AB683}
-		{238B31E4-EFA3-4847-8466-348D70050D75} = {C352872B-5D72-4081-A29A-A8C86F5AB683}
+		{227BA2EA-261C-4EAC-B9FE-F6E16A1AD5E1} = {C352872B-5D72-4081-A29A-A8C86F5AB683}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {69C12E65-33D6-402A-90D6-D37AB418B7C0}
