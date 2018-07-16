@@ -125,11 +125,10 @@ module Implementation =
             match toPieceOpt with
             | Some toPiece -> // Moving to an occupied cell
                 // Check for diagonal captures
-                match (fromPieceColor, xDelta, yDelta) with
-                | (White, 1, 1) -> Ok move
-                | (White, -1, 1) -> Ok move
-                | (Black, 1, -1) -> Ok move
-                | (Black, -1, -1) -> Ok move
+                match (fromPieceColor, abs xDelta, yDelta) with
+                | (White, 1, 1) 
+                | (Black, 1, -1) 
+                    -> Ok move
                 | _ -> Error "Pawn can only capture moving one space diagonally"
             | None ->  // Moving to an empty cell
                 // Check for straight non-captures
