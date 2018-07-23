@@ -9,8 +9,15 @@ namespace Chess.ConsoleUI
 {
     class Program
     {
+
+        private static bool UseEmoji = false;
         static void Main(string[] args)
         {
+            if (args.Length > 0 && args[0] == "-e")
+            {
+                UseEmoji = true;
+            }
+
             var api = new ChessApi();
             RenderGame(api);
         }
@@ -68,13 +75,58 @@ namespace Chess.ConsoleUI
                 {
                     api.Move(move.From, move.To);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                 }
             }
 
             Console.Clear();
             RenderGame(api);
+        }
+
+        private static Dictionary<string,string> rankChars = new Dictionary<string, string>
+        {
+            ["pawn"] = "p",
+            ["rook"] = "r",
+            ["knight"] = "n",
+            ["bishop"] = "b",
+            ["queen"] = "q",
+            ["king"] = "k"
+        };
+        private static Dictionary<string,string> rankEmojiBlack = new Dictionary<string, string>
+        {
+            ["pawn"] = "♟",
+            ["rook"] = "♜",
+            ["knight"] = "♞",
+            ["bishop"] = "♝",
+            ["queen"] = "♛",
+            ["king"] = "♚"
+        };
+        private static Dictionary<string,string> rankEmojiWhite = new Dictionary<string, string>
+        {
+            ["pawn"] = "♙",
+            ["rook"] = "♖",
+            ["knight"] = "♘",
+            ["bishop"] = "♗",
+            ["queen"] = "♕",
+            ["king"] = "♔"
+        };
+
+        static string glyphForPiece(string rank, string color)
+        {
+            if (UseEmoji)
+            {
+                var glyphs = (color == "black") ? rankEmojiBlack : rankEmojiWhite;
+                return glyphs[rank];
+            }
+            else
+            {
+                var glyph = rankChars[rank];
+                return (color == "black") ? glyph.ToLower() : glyph.ToUpper();
+            }
+
+
+
         }
 
         static string RenderCell(CellDTO cell)
@@ -85,30 +137,30 @@ namespace Chess.ConsoleUI
                     return ".";
 
                 case CellDTO c when c.color == "black" && c.rank == "pawn":
-                    return "p";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "black" && c.rank == "rook":
-                    return "r";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "black" && c.rank == "knight":
-                    return "n";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "black" && c.rank == "bishop":
-                    return "b";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "black" && c.rank == "queen":
-                    return "q";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "black" && c.rank == "king":
-                    return "k";
+                    return glyphForPiece(c.rank, c.color);
 
                 case CellDTO c when c.color == "white" && c.rank == "pawn":
-                    return "P";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "white" && c.rank == "rook":
-                    return "R";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "white" && c.rank == "knight":
-                    return "N";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "white" && c.rank == "bishop":
-                    return "B";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "white" && c.rank == "queen":
-                    return "Q";
+                    return glyphForPiece(c.rank, c.color);
                 case CellDTO c when c.color == "white" && c.rank == "king":
-                    return "K";
+                    return glyphForPiece(c.rank, c.color);
 
                 default:
                     throw new Exception("Invalid piece.");
