@@ -16,6 +16,7 @@ namespace Chess.ConsoleUI
             if (args.Length > 0 && args[0] == "-e")
             {
                 UseEmoji = true;
+                Console.OutputEncoding = Encoding.UTF8;
             }
 
             var api = new ChessApi();
