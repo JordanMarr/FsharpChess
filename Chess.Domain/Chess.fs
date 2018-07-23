@@ -13,7 +13,7 @@ module Entities =
     type Cell = Column * Row
     type Board = Map<Cell, Piece option>
     type GameProgress = | InProgress | WhiteWins | BlackWins
-    type GameState = { board: Board; nextMove: Color; message: string }
+    type GameState = { Board: Board; NextMove: Color; Message: string }
     type AttemptedMove = Cell * Cell
     type ValidatedMoveFrom = Piece * Cell * Cell
     
@@ -39,15 +39,15 @@ module Implementation =
                 (A,One), white Rook; (B,One), white Knight; (C,One), white Bishop; (D,One), white King; (E,One), white Queen; (F,One), white Bishop; (G,One), white Knight; (H,One), white Rook;
             ]
 
-        {   board = board; 
-            nextMove = White; 
-            message = "Welcome to F# Chess!" }
+        {   Board = board; 
+            NextMove = White; 
+            Message = "Welcome to F# Chess!" }
 
     let validateTurn gameState move =
         let fromCell, toCell = move
-        match gameState.board.[fromCell] with
+        match gameState.Board.[fromCell] with
         | Some (fromColor, fromRank) -> 
-            if fromColor = gameState.nextMove
+            if fromColor = gameState.NextMove
             then Ok ((fromColor, fromRank), fromCell, toCell)
             else Error "It's not your turn"
         | None -> 
@@ -55,9 +55,9 @@ module Implementation =
 
     let validateNotFriendlyTarget gameState move =
         let fromPiece, fromCell, toCell = move
-        match gameState.board.[toCell] with
+        match gameState.Board.[toCell] with
         | Some (toColor, toRank) -> 
-            if gameState.nextMove = toColor
+            if gameState.NextMove = toColor
             then Error "Can not take a friendly piece"
             else Ok move
         | None -> Ok move
@@ -86,7 +86,7 @@ module Implementation =
     let validateMoveShape gameState move : Result<ValidatedMoveFrom, string> =
         let fromPiece, fromCell, toCell = move
         let (fromPieceColor, fromPieceRank) = fromPiece
-        let toPieceOpt = gameState.board.Item toCell
+        let toPieceOpt = gameState.Board.Item toCell
                 
         let xDelta = getHorizDist fromCell toCell
         let yDelta = getVertDist fromCell toCell
@@ -176,7 +176,7 @@ module Implementation =
 
             let valid = moveSeq fromCell unitVector 
                         |> Seq.takeWhile (fun move -> move <> toCell)
-                        |> Seq.forall (fun move -> gameState.board.[move].IsNone)
+                        |> Seq.forall (fun move -> gameState.Board.[move].IsNone)
             
             if valid
             then Ok move
@@ -208,8 +208,8 @@ module Implementation =
         match validatedMove with
         | Ok move -> 
             { gameState with 
-                        board = updateBoard gameState.board move
-                        nextMove = updateNextMoveColor(gameState.nextMove) 
-                        message = "" }
+                        Board = updateBoard gameState.Board move
+                        NextMove = updateNextMoveColor(gameState.NextMove) 
+                        Message = "" }
         | Error msg ->
-            { gameState with message = msg }
+            { gameState with Message = msg }

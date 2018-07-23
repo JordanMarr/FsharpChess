@@ -3,7 +3,7 @@
 module Api = 
     open Chess.Domain.Entities
 
-    type CellDTO = { coord: string; isOccupied: bool; color: string; rank: string }
+    type CellDTO = { Coord: string; IsOccupied: bool; Color: string; Rank: string }
     
     // Helpers
     let listColumns = [A; B; C; D; E; F; G; H]
@@ -29,17 +29,17 @@ module Api =
             match piece with
             | Some (color,rank) -> 
                 { 
-                    coord = serializeCell cell
-                    isOccupied = true
-                    color = match color with | White -> "white" | Black -> "black"
-                    rank = match rank with | Pawn _ -> "pawn" | Rook -> "rook" | Bishop -> "bishop" | King -> "king" | Queen -> "queen" | Knight -> "knight"
+                    Coord = serializeCell cell
+                    IsOccupied = true
+                    Color = match color with | White -> "white" | Black -> "black"
+                    Rank = match rank with | Pawn _ -> "pawn" | Rook -> "rook" | Bishop -> "bishop" | King -> "king" | Queen -> "queen" | Knight -> "knight"
                 }
             | None ->
                 {
-                    coord = serializeCell cell
-                    isOccupied = false
-                    color = null
-                    rank = null
+                    Coord = serializeCell cell
+                    IsOccupied = false
+                    Color = null
+                    Rank = null
                 })
         cells
 
@@ -49,9 +49,9 @@ module Api =
         
         member this.InitGame() = gameState <- Implementation.initGame()
 
-        member this.Cells with get() = boardToCellsDto gameState.board |> List.toArray
+        member this.Cells with get() = boardToCellsDto gameState.Board |> List.toArray
 
-        member this.Message with get() = gameState.message
+        member this.Message with get() = gameState.Message
 
         member this.Move(fromCell: string, toCell: string) =
             let cell1 = deserializeCoord fromCell

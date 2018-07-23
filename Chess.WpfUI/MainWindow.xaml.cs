@@ -42,12 +42,12 @@ namespace Chess.WpfUI
         {
             foreach (var cell in _api.Cells)
             {
-                var border = (Border)FindName(cell.coord);
+                var border = (Border)FindName(cell.Coord);
                 var button = border.Child as Button;
                 var img = button.Content as Image;
-                if (cell.isOccupied)
+                if (cell.IsOccupied)
                 {
-                    var path = $"/Images/pieces_{cell.color}/{cell.rank}.png";
+                    var path = $"/Images/pieces_{cell.Color}/{cell.Rank}.png";
                     var bm = new BitmapImage(new Uri(path, UriKind.Relative));
                     img.Source = bm;
                 }

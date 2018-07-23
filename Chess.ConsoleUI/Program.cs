@@ -45,7 +45,7 @@ namespace Chess.ConsoleUI
 
             var rows = new[] { "8", "7", "6", "5", "4", "3", "2", "1" };
             var cols = new[] { "A", "B", "C", "D", "E", "F", "G", "H" };
-            var cells = api.Cells.ToDictionary(c => c.coord);
+            var cells = api.Cells.ToDictionary(c => c.Coord);
 
             foreach (var row in rows)
             {
@@ -134,34 +134,34 @@ namespace Chess.ConsoleUI
         {
             switch (cell)
             {
-                case CellDTO c when !c.isOccupied:
+                case CellDTO c when !c.IsOccupied:
                     return ".";
 
-                case CellDTO c when c.color == "black" && c.rank == "pawn":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "black" && c.rank == "rook":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "black" && c.rank == "knight":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "black" && c.rank == "bishop":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "black" && c.rank == "queen":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "black" && c.rank == "king":
-                    return glyphForPiece(c.rank, c.color);
+                case CellDTO c when c.Color == "black" && c.Rank == "pawn":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "black" && c.Rank == "rook":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "black" && c.Rank == "knight":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "black" && c.Rank == "bishop":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "black" && c.Rank == "queen":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "black" && c.Rank == "king":
+                    return glyphForPiece(c.Rank, c.Color);
 
-                case CellDTO c when c.color == "white" && c.rank == "pawn":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "white" && c.rank == "rook":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "white" && c.rank == "knight":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "white" && c.rank == "bishop":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "white" && c.rank == "queen":
-                    return glyphForPiece(c.rank, c.color);
-                case CellDTO c when c.color == "white" && c.rank == "king":
-                    return glyphForPiece(c.rank, c.color);
+                case CellDTO c when c.Color == "white" && c.Rank == "pawn":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "white" && c.Rank == "rook":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "white" && c.Rank == "knight":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "white" && c.Rank == "bishop":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "white" && c.Rank == "queen":
+                    return glyphForPiece(c.Rank, c.Color);
+                case CellDTO c when c.Color == "white" && c.Rank == "king":
+                    return glyphForPiece(c.Rank, c.Color);
 
                 default:
                     throw new Exception("Invalid piece.");
