@@ -1,15 +1,14 @@
 namespace Chess.Domain
-open System
 
 module Entities =    
     type Color = | White | Black
     type HasMoved = | NotMoved | Moved
     type Rank = | Pawn of HasMoved | Rook | Bishop | Knight | Queen | King
     type Piece = Color * Rank    
-    type Column = | A | B | C | D | E | F | G | H    
-    type Row = | One | Two | Three | Four | Five | Six | Seven | Eight
-    let columns = [A;B;C;D;E;F;G;H]
-    let rows = [One; Two; Three; Four; Five; Six; Seven; Eight]
+    type Column = | A | B | C | D | E | F | G | H  
+        with static member List = [A;B;C;D;E;F;G;H]
+    type Row = | One | Two | Three | Four | Five | Six | Seven | Eight 
+        with static member List = [One; Two; Three; Four; Five; Six; Seven; Eight]    
     type Cell = Column * Row
     type Board = Map<Cell, Piece option>
     type GameProgress = | InProgress | WhiteWins | BlackWins
@@ -63,24 +62,24 @@ module Implementation =
         | None -> Ok move
         
     let getHorizDist (fromCol, fromRow) (toCol, toRow) =
-        let fromHorizIndex = List.findIndex (fun c -> c = fromCol) columns
-        let toHorizIndex = List.findIndex (fun c -> c = toCol) columns
-        toHorizIndex - fromHorizIndex
+        let toIdx = Column.List |> List.findIndex (fun c -> c = toCol)
+        let fromIdx = Column.List |> List.findIndex (fun c -> c = fromCol)
+        toIdx - fromIdx
 
     let getVertDist (fromCol, fromRow) (toCol, toRow) =
-        let fromVertIndex = List.findIndex (fun r -> r = fromRow) rows
-        let toVertIndex = List.findIndex (fun r -> r = toRow) rows
-        toVertIndex - fromVertIndex
+        let toIdx = Row.List |> List.findIndex (fun r -> r = toRow)
+        let fromIdx = Row.List |> List.findIndex (fun r -> r = fromRow)
+        toIdx - fromIdx
 
     let tryGetCell (colIdx,rowIdx) =
-        if colIdx < columns.Length && colIdx >= 0 && rowIdx < columns.Length && rowIdx >= 0
-        then Some (columns.[colIdx], rows.[rowIdx])
+        if colIdx < Column.List.Length && colIdx >= 0 && rowIdx < Column.List.Length && rowIdx >= 0
+        then Some (Column.List.[colIdx], Row.List.[rowIdx])
         else None
     
     let getCoords cell = 
         let col,row = cell
-        let colIdx = List.findIndex (fun c -> c = col) columns
-        let rowIdx = List.findIndex (fun r -> r = row) rows
+        let colIdx = Column.List |> List.findIndex (fun c -> c = col)
+        let rowIdx = Row.List |> List.findIndex (fun r -> r = row)
         (colIdx, rowIdx)
         
     let validateMoveShape gameState move : Result<ValidatedMoveFrom, string> =

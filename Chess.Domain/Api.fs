@@ -5,22 +5,18 @@ module Api =
 
     type CellDTO = { Coord: string; IsOccupied: bool; Color: string; Rank: string }
     
-    // Helpers
-    let listColumns = [A; B; C; D; E; F; G; H]
-    let listRows = [One; Two; Three; Four; Five; Six; Seven; Eight]
-
-    // cellStr ex: "{ coord: "A1", piece { rank: "Bishop", color: "White" }
+    /// cellStr ex: "{ coord: "A1", piece { rank: "Bishop", color: "White" }
     let deserializeCoord (cellStr: string) : Cell = 
-        let colMap = List.zip ["A"; "B"; "C"; "D"; "E"; "F"; "G"; "H";] listColumns |> Map.ofList
-        let rowMap = List.zip ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8";] listRows |> Map.ofList
+        let colMap = List.zip ["A"; "B"; "C"; "D"; "E"; "F"; "G"; "H";] Column.List |> Map.ofList
+        let rowMap = List.zip ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8";] Row.List |> Map.ofList
         match cellStr.ToCharArray() with
         | [| col; row |] -> (colMap.[col.ToString()],rowMap.[row.ToString()])
         | _ -> failwith "Invalid cell"
     
     let serializeCell cell =
         let (col,row) = cell
-        let colMap = List.zip listColumns ["A"; "B"; "C"; "D"; "E"; "F"; "G"; "H";] |> Map.ofList
-        let rowMap = List.zip listRows ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8";] |> Map.ofList
+        let colMap = List.zip Column.List ["A"; "B"; "C"; "D"; "E"; "F"; "G"; "H";] |> Map.ofList
+        let rowMap = List.zip Row.List ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8";] |> Map.ofList
         colMap.[col] + rowMap.[row]
 
     let boardToCellsDto (board: Board) =
