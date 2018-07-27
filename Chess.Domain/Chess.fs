@@ -26,17 +26,19 @@ module Implementation =
         let white rank = Some (White, rank)
         let black rank = Some (Black, rank)
 
+        let createRow row pieces =
+            let cells = Column.List |> List.map (fun col -> col, row)
+            List.zip cells pieces 
+
         let board = 
-            Map [
-                (A,Eight), black Rook; (B,Eight), black Knight; (C,Eight), black Bishop; (D,Eight), black King; (E,Eight), black Queen; (F,Eight), black Bishop; (G,Eight), black Knight; (H,Eight), black Rook;
-                (A,Seven),  blackPawn; (B,Seven), blackPawn; (C,Seven), blackPawn; (D,Seven), blackPawn; (E,Seven), blackPawn; (F,Seven), blackPawn; (G,Seven), blackPawn; (H,Seven), blackPawn; 
-                (A,Six), None; (B,Six), None; (C,Six), None; (D,Six), None; (E,Six), None; (F,Six), None; (G,Six), None; (H,Six), None;
-                (A,Five), None; (B,Five), None; (C,Five), None; (D,Five), None; (E,Five), None; (F,Five), None; (G,Five), None; (H,Five), None;
-                (A,Four), None; (B,Four), None; (C,Four), None; (D,Four), None; (E,Four), None; (F,Four), None; (G,Four), None; (H,Four), None;
-                (A,Three), None; (B,Three), None; (C,Three), None; (D,Three), None; (E,Three), None; (F,Three), None; (G,Three), None; (H,Three), None;
-                (A,Two), whitePawn; (B,Two), whitePawn; (C,Two), whitePawn; (D,Two), whitePawn; (E,Two), whitePawn; (F,Two), whitePawn; (G,Two), whitePawn; (H,Two), whitePawn; 
-                (A,One), white Rook; (B,One), white Knight; (C,One), white Bishop; (D,One), white King; (E,One), white Queen; (F,One), white Bishop; (G,One), white Knight; (H,One), white Rook;
-            ]
+            Map (   (createRow Eight    [black Rook;   black Knight;   black Bishop;   black King;     black Queen;    black Bishop;   black Knight;   black Rook]) @
+                    (createRow Seven    [blackPawn;    blackPawn;      blackPawn;      blackPawn;      blackPawn;      blackPawn;      blackPawn;      blackPawn]) @
+                    (createRow Six      [None;         None;           None;           None;           None;           None;           None;           None]) @
+                    (createRow Five     [None;         None;           None;           None;           None;           None;           None;           None]) @
+                    (createRow Four     [None;         None;           None;           None;           None;           None;           None;           None]) @
+                    (createRow Three    [None;         None;           None;           None;           None;           None;           None;           None]) @
+                    (createRow Two      [whitePawn;    whitePawn;      whitePawn;      whitePawn;      whitePawn;      whitePawn;      whitePawn;      whitePawn]) @
+                    (createRow One      [white Rook;   white Knight;   white Bishop;   white King;     white Queen;    white Bishop;   white Knight;   white Rook]) )
 
         {   Board = board; 
             NextMove = White; 
