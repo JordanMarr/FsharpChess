@@ -10,14 +10,13 @@ module Api =
         let colMap = List.zip ["A"; "B"; "C"; "D"; "E"; "F"; "G"; "H";] Column.List |> Map.ofList
         let rowMap = List.zip ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8";] Row.List |> Map.ofList
         match cellStr.ToCharArray() with
-        | [| col; row |] -> (colMap.[col.ToString()],rowMap.[row.ToString()])
+        | [| col; row |] -> { Col = colMap.[col.ToString()]; Row = rowMap.[row.ToString()] }
         | _ -> failwith "Invalid cell"
     
     let serializeCell cell =
-        let (col,row) = cell
         let colMap = List.zip Column.List ["A"; "B"; "C"; "D"; "E"; "F"; "G"; "H";] |> Map.ofList
         let rowMap = List.zip Row.List ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8";] |> Map.ofList
-        colMap.[col] + rowMap.[row]
+        colMap.[cell.Col] + rowMap.[cell.Row]
 
     let boardToCellsDto (board: Board) =
         let cell_piece_list = Map.toList board
@@ -52,5 +51,5 @@ module Api =
         member this.Move(fromCell: string, toCell: string) =
             let cell1 = deserializeCoord fromCell
             let cell2 = deserializeCoord toCell
-            gameState <- Implementation.move gameState (cell1,cell2)
+            gameState <- Implementation.move gameState { FromCell = cell1; ToCell = cell2 }
             ()
