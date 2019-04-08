@@ -1,5 +1,4 @@
-﻿// Copyright 2018 Fabulous contributors. See LICENSE.md for license.
-namespace Chess.FabUI
+﻿namespace Chess.FabUI
 
 open System.Diagnostics
 open Fabulous.Core
@@ -10,18 +9,27 @@ open Chess.Domain.Entities
 
 module App = 
     type Model = 
-      { GameState: Entities.GameState }
+      { GameState: Entities.GameState 
+        FromCell: Cell option }
 
     type Msg = 
         | Move of Entities.AttemptedMove
+        | PickCell of Cell
 
-    let initModel = { GameState = Implementation.initGame() }
+    let initModel = { GameState = Implementation.initGame(); FromCell = None }
 
     let init () = initModel, Cmd.none
 
     let update msg model =
         match msg with
         | Move move -> { model with GameState = Implementation.move model.GameState move }, Cmd.none
+        | PickCell cell -> 
+            match model.FromCell with
+            | Some fromCell -> 
+                let gameState = Implementation.move model.GameState { AttemptedMove.FromCell = fromCell; AttemptedMove.ToCell = cell }
+                { model with GameState = gameState; FromCell = None }, Cmd.none
+            | None -> 
+                { model with FromCell = Some cell }, Cmd.none
         
     let indexedCells =
         let indexedCols = List.zip Entities.Column.List [0..7]
@@ -51,27 +59,15 @@ module App =
                             for (cell, (colIdx, rowIdx)) in indexedCells do
                                 let imageSource = imageForPiece model.GameState.Board.[cell]
                                 yield 
-                                    View.Image(
-                                        source=imageSource, 
-                                        horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center
-                                        //command=(fun () -> dispatch (Move { AttemptedMove.FromCell}))
+                                    View.Grid(backgroundColor=Color.LightBlue,
+                                        children=[
+                                            View.Image(source=imageSource, horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center)
+                                            View.Button(
+                                                backgroundColor=Color.Transparent, 
+                                                command=(fun () -> dispatch (PickCell cell))
+                                            )
+                                        ]
                                     ).GridColumn(colIdx).GridRow(rowIdx)
-                                    //View.Grid(backgroundColor=Color.LightBlue,
-                                    //    rowdefs=[50.],
-                                    //    coldefs=[50.],
-                                    //    children=[
-                                    //        View.Image(source=imageSource, horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center).GridColumn(colIdx).GridRow(rowIdx)
-                                    //        //View.Button(backgroundColor=Color.Transparent)
-                                    //    ]
-                                    //).GridColumn(colIdx).GridRow(rowIdx)
-
-                                    //View.Button(backgroundColor=Color.LightBlue,
-                                        
-                                    //).GridColumn(colIdx).GridRow(rowIdx)
-                                    //.Content(
-                                    //    //View.Image(source=imageSource, horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center, margin=5.)
-                                    //    View.Label("TEST")
-                                    //).GridColumn(colIdx).GridRow(rowIdx)
                         ]
                     )
 
