@@ -15,7 +15,7 @@ module Main =
 
         let app = new System.Windows.Application()
         Forms.Init()
-        let window = MainWindow() 
+        let window = MainWindow(Title = "F# Chess", Height=530., Width=402.) 
         window.LoadApplication(new Chess.FabUI.App())
 
         app.Run(window)

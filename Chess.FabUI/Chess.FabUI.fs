@@ -49,19 +49,23 @@ module App =
             ""
 
     let view (model: Model) dispatch =
-        View.ContentPage(widthRequest=416.,heightRequest=460.,
+        View.ContentPage(
             content = View.StackLayout(
                 children = [
                     View.Grid(
                         rowdefs=[50.; 50.; 50.; 50.; 50.; 50.; 50.; 50.],
                         coldefs=[50.; 50.; 50.; 50.; 50.; 50.; 50.; 50.],
+                        columnSpacing=0., rowSpacing=0.,
                         children=[                            
                             for (cell, (colIdx, rowIdx)) in indexedCells do
                                 let imageSource = imageForPiece model.GameState.Board.[cell]
                                 yield 
-                                    View.Grid(backgroundColor=Color.LightBlue,
+                                    View.Grid(backgroundColor=Color.LightBlue, 
                                         children=[
-                                            View.Image(source=imageSource, horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center)
+                                            View.Image(
+                                                source=imageSource, 
+                                                horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center
+                                            )
                                             View.Button(
                                                 backgroundColor=Color.Transparent, 
                                                 command=(fun () -> dispatch (PickCell cell))
