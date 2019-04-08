@@ -69,17 +69,11 @@ module App =
                                 let imageSource = imageForPiece model.GameState.Board.[cell]
 
                                 yield 
-                                    View.Grid(backgroundColor=color, 
-                                        children=[
-                                            View.Image(
-                                                source=imageSource, 
-                                                horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center
-                                            )
-                                            View.Button(
-                                                backgroundColor=Color.Transparent, 
-                                                command=(fun () -> dispatch (PickCell cell))
-                                            )
-                                        ]
+                                    View.ImageButton(
+                                        backgroundColor = color,
+                                        source = imageSource, 
+                                        aspect=Aspect.AspectFit,
+                                        clicked=(fun x -> dispatch (PickCell cell))                                        
                                     ).GridColumn(colIdx).GridRow(rowIdx)
                         ]
                     )
