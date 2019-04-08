@@ -1,5 +1,7 @@
 ﻿namespace Chess.Domain
 
+/// Facilitates interop when using the C# WPF UI.
+/// Not needed when using the Fabulous UI!
 module Api = 
     open Chess.Domain.Entities
 
