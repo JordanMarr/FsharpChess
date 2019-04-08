@@ -31,9 +31,15 @@ module App =
             | None -> 
                 { model with FromCell = Some cell }, Cmd.none
         
+    let getCellColor colIdx rowIdx =
+        if (colIdx + rowIdx) % 2 = 0
+        then Xamarin.Forms.Color.White
+        else Xamarin.Forms.Color.LightBlue
+        
     let indexedCells =
         let indexedCols = List.zip Entities.Column.List [0..7]
         let indexedRows = List.zip Entities.Row.List ([0..7] |> List.rev)
+
         [ for col, colIdx in indexedCols do
             for row, rowIdx in indexedRows do 
                 yield { Col = col; Row = row }, (colIdx, rowIdx) ]
@@ -58,9 +64,12 @@ module App =
                         columnSpacing=0., rowSpacing=0.,
                         children=[                            
                             for (cell, (colIdx, rowIdx)) in indexedCells do
+
+                                let color = getCellColor colIdx rowIdx
                                 let imageSource = imageForPiece model.GameState.Board.[cell]
+
                                 yield 
-                                    View.Grid(backgroundColor=Color.LightBlue, 
+                                    View.Grid(backgroundColor=color, 
                                         children=[
                                             View.Image(
                                                 source=imageSource, 
