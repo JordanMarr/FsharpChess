@@ -33,7 +33,7 @@ module App =
         
     let indexedCells =
         let indexedCols = List.zip Entities.Column.List [0..7]
-        let indexedRows = List.zip Entities.Row.List [0..7]
+        let indexedRows = List.zip Entities.Row.List ([0..7] |> List.rev)
         [ for col, colIdx in indexedCols do
             for row, rowIdx in indexedRows do 
                 yield { Col = col; Row = row }, (colIdx, rowIdx) ]
