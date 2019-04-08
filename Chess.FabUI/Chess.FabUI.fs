@@ -16,9 +16,8 @@ module App =
         /// User will pick a "from" cell, and then a "to" cell.
         | PickCell of Cell
 
-    let initModel = { GameState = Implementation.initGame(); FromCell = None }
-
-    let init () = initModel, Cmd.none
+    let init () = 
+        { GameState = Implementation.initGame(); FromCell = None }, Cmd.none
 
     let update msg model =
         match msg with
