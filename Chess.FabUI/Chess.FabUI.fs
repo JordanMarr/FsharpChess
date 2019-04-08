@@ -35,7 +35,8 @@ module App =
         | Some (color, rank) -> 
             let colorStr = match color with | White -> "white" | Black -> "black"
             let rankStr = match rank with | Pawn _ -> "pawn" | Rook -> "rook" | Bishop -> "bishop" | King -> "king" | Queen -> "queen" | Knight -> "knight"
-            sprintf "/Images/pieces_%s/%s.png" colorStr rankStr
+            sprintf "Images/pieces_%s/%s.png" colorStr rankStr
+            
         | None -> 
             ""
 
@@ -50,9 +51,27 @@ module App =
                             for (cell, (colIdx, rowIdx)) in indexedCells do
                                 let imageSource = imageForPiece model.GameState.Board.[cell]
                                 yield 
-                                    View.Button(backgroundColor=Color.LightBlue).Content(
-                                        View.Image(source=imageSource, horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center, margin=5.)
+                                    View.Image(
+                                        source=imageSource, 
+                                        horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center
+                                        //command=(fun () -> dispatch (Move { AttemptedMove.FromCell}))
                                     ).GridColumn(colIdx).GridRow(rowIdx)
+                                    //View.Grid(backgroundColor=Color.LightBlue,
+                                    //    rowdefs=[50.],
+                                    //    coldefs=[50.],
+                                    //    children=[
+                                    //        View.Image(source=imageSource, horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center).GridColumn(colIdx).GridRow(rowIdx)
+                                    //        //View.Button(backgroundColor=Color.Transparent)
+                                    //    ]
+                                    //).GridColumn(colIdx).GridRow(rowIdx)
+
+                                    //View.Button(backgroundColor=Color.LightBlue,
+                                        
+                                    //).GridColumn(colIdx).GridRow(rowIdx)
+                                    //.Content(
+                                    //    //View.Image(source=imageSource, horizontalOptions=LayoutOptions.Center, verticalOptions=LayoutOptions.Center, margin=5.)
+                                    //    View.Label("TEST")
+                                    //).GridColumn(colIdx).GridRow(rowIdx)
                         ]
                     )
 
