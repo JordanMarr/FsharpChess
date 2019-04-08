@@ -13,7 +13,7 @@ module App =
         FromCell: Cell option }
 
     type Msg = 
-        | Move of Entities.AttemptedMove
+        /// User will pick a "from" cell, and then a "to" cell.
         | PickCell of Cell
 
     let initModel = { GameState = Implementation.initGame(); FromCell = None }
@@ -22,15 +22,16 @@ module App =
 
     let update msg model =
         match msg with
-        | Move move -> { model with GameState = Implementation.move model.GameState move }, Cmd.none
         | PickCell cell -> 
             match model.FromCell with
-            | Some fromCell -> 
+            | None -> // User hasn't selected a cell yet
+                { model with FromCell = Some cell }, Cmd.none
+            | Some fromCell -> // User has already selected the "from" cell
                 let gameState = Implementation.move model.GameState { AttemptedMove.FromCell = fromCell; AttemptedMove.ToCell = cell }
                 { model with GameState = gameState; FromCell = None }, Cmd.none
-            | None -> 
-                { model with FromCell = Some cell }, Cmd.none
         
+    // View stuff...
+
     let getCellColor colIdx rowIdx =
         if (colIdx + rowIdx) % 2 = 0
         then Xamarin.Forms.Color.White
