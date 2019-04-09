@@ -64,17 +64,11 @@ module App =
                         columnSpacing=0., rowSpacing=0.,
                         children=[                            
                             for (cell, (colIdx, rowIdx)) in indexedCells do
-
                                 let color = getCellColor colIdx rowIdx
                                 let imageSource = imageForPiece model.GameState.Board.[cell]
-
-                                yield 
-                                    View.ImageButton(
-                                        backgroundColor = color,
-                                        source = imageSource, 
-                                        aspect=Aspect.AspectFit,
-                                        clicked=(fun x -> dispatch (PickCell cell))                                        
-                                    ).GridColumn(colIdx).GridRow(rowIdx)
+                                yield View.BoxView(color).GridColumn(colIdx).GridRow(rowIdx)
+                                yield View.Image(imageSource).GridColumn(colIdx).GridRow(rowIdx)
+                                yield View.Button(backgroundColor = Color.Transparent, command=(fun () -> dispatch (PickCell cell))).GridColumn(colIdx).GridRow(rowIdx)
                         ]
                     )
 
