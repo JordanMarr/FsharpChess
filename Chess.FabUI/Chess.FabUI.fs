@@ -66,9 +66,17 @@ module App =
                             for (cell, (colIdx, rowIdx)) in indexedCells do
                                 let color = getCellColor colIdx rowIdx
                                 let imageSource = imageForPiece model.GameState.Board.[cell]
-                                yield View.BoxView(color).GridColumn(colIdx).GridRow(rowIdx)
-                                yield View.Image(imageSource).GridColumn(colIdx).GridRow(rowIdx)
-                                yield View.Button(backgroundColor = Color.Transparent, command=(fun () -> dispatch (PickCell cell))).GridColumn(colIdx).GridRow(rowIdx)
+                                let onTap = View.TapGestureRecognizer(command=(fun () -> dispatch (PickCell cell)))
+
+                                yield View.Frame(
+                                    backgroundColor = color,                                   
+                                    gestureRecognizers = [onTap]
+                                ).GridColumn(colIdx).GridRow(rowIdx)
+
+                                yield View.Image(
+                                    source = imageSource,
+                                    gestureRecognizers = [onTap]
+                                ).GridColumn(colIdx).GridRow(rowIdx)
                         ]
                     )
 
