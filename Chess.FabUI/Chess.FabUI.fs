@@ -29,32 +29,30 @@ module App =
                 let gameState = Implementation.move model.GameState { AttemptedMove.FromCell = fromCell; AttemptedMove.ToCell = cell }
                 { model with GameState = gameState; FromCell = None }, Cmd.none
         
-    // View stuff...
-
-    let getCellColor colIdx rowIdx =
-        if (colIdx + rowIdx) % 2 = 0
-        then Xamarin.Forms.Color.White
-        else Xamarin.Forms.Color.LightBlue
-        
-    let indexedCells =
-        let indexedCols = List.zip Entities.Column.List [0..7]
-        let indexedRows = List.zip Entities.Row.List ([0..7] |> List.rev)
-
-        [ for col, colIdx in indexedCols do
-            for row, rowIdx in indexedRows do 
-                yield { Col = col; Row = row }, (colIdx, rowIdx) ]
-
-    let imageForPiece pieceOpt = 
-        match pieceOpt with
-        | Some (color, rank) -> 
-            let colorStr = match color with | White -> "white" | Black -> "black"
-            let rankStr = match rank with | Pawn _ -> "pawn" | Rook -> "rook" | Bishop -> "bishop" | King -> "king" | Queen -> "queen" | Knight -> "knight"
-            sprintf "Images/pieces_%s/%s.png" colorStr rankStr
-            
-        | None -> 
-            ""
-
     let view (model: Model) dispatch =
+
+        let getCellColor colIdx rowIdx =
+            if (colIdx + rowIdx) % 2 = 0
+            then Xamarin.Forms.Color.White
+            else Xamarin.Forms.Color.LightBlue
+        
+        let indexedCells =
+            let indexedCols = List.zip Entities.Column.List [0..7]
+            let indexedRows = List.zip Entities.Row.List ([0..7] |> List.rev)
+
+            [ for col, colIdx in indexedCols do
+                for row, rowIdx in indexedRows do 
+                    yield { Col = col; Row = row }, (colIdx, rowIdx) ]
+
+        let imageForPiece pieceOpt = 
+            match pieceOpt with
+            | Some (color, rank) -> 
+                let colorStr = match color with | White -> "white" | Black -> "black"
+                let rankStr = match rank with | Pawn _ -> "pawn" | Rook -> "rook" | Bishop -> "bishop" | King -> "king" | Queen -> "queen" | Knight -> "knight"
+                sprintf "Images/pieces_%s/%s.png" colorStr rankStr
+            
+            | None -> ""
+
         View.ContentPage(
             content = View.StackLayout(
                 children = [
@@ -87,6 +85,9 @@ module App =
 
     // Note, this declaration is needed if you enable LiveUpdate
     let program = Program.mkProgram init update view
+
+
+
 
 type App () as app = 
     inherit Application ()
