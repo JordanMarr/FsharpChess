@@ -23,18 +23,25 @@ module App =
         match msg with
         | PickCell cell -> 
             match model.FromCell with
-            | None -> // User hasn't selected a cell yet
-                { model with FromCell = Some cell }, Cmd.none
-            | Some fromCell -> // User has already selected the "from" cell
+            | None -> // FromCell was not previously selected
+                match model.GameState.Board.[cell] with
+                | Some piece -> { model with FromCell = Some cell }, Cmd.none // Selected a cell has a piece, so update FromCell
+                | None -> model, Cmd.none // Selected cell has no piece, so ignore it
+
+            | Some fromCell -> // FromCell was already selected
                 let gameState = Implementation.move model.GameState { AttemptedMove.FromCell = fromCell; AttemptedMove.ToCell = cell }
                 { model with GameState = gameState; FromCell = None }, Cmd.none
         
     let view (model: Model) dispatch =
 
-        let getCellColor colIdx rowIdx =
-            if (colIdx + rowIdx) % 2 = 0
-            then Xamarin.Forms.Color.White
-            else Xamarin.Forms.Color.LightBlue
+        let getCellBgColor cell colIdx rowIdx =
+            if Some cell = model.FromCell then Color.LightGreen
+            elif (colIdx + rowIdx) % 2 = 0 then Xamarin.Forms.Color.White
+            else Color.LightBlue
+
+        let getCellBorderColor cell =
+            if Some cell = model.FromCell then Color.Green 
+            else Color.Gray
         
         let indexedCells =
             let indexedCols = List.zip Entities.Column.List [0..7]
@@ -62,12 +69,14 @@ module App =
                         columnSpacing=0., rowSpacing=0.,
                         children=[                            
                             for (cell, (colIdx, rowIdx)) in indexedCells do
-                                let color = getCellColor colIdx rowIdx
+                                let bgColor = getCellBgColor cell colIdx rowIdx
+                                let borderColor = getCellBorderColor cell
                                 let imageSource = imageForPiece model.GameState.Board.[cell]
                                 let onTap = View.TapGestureRecognizer(command=(fun () -> dispatch (PickCell cell)))
 
                                 yield View.Frame(
-                                    backgroundColor = color,                                   
+                                    backgroundColor = bgColor,
+                                    borderColor = borderColor,
                                     gestureRecognizers = [onTap]
                                 ).GridColumn(colIdx).GridRow(rowIdx)
 
