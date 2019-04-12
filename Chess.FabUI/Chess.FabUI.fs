@@ -61,13 +61,14 @@ module App =
             | None -> ""
 
         View.ContentPage(
-            content = View.StackLayout(
-                children = [
-                    View.Grid(
-                        rowdefs=[50.; 50.; 50.; 50.; 50.; 50.; 50.; 50.],
-                        coldefs=[50.; 50.; 50.; 50.; 50.; 50.; 50.; 50.],
-                        columnSpacing=0., rowSpacing=0.,
-                        children=[                            
+            StackLayout.stackLayout [ // <-- Fabulous.SimpleElements nuget package
+                StackLayout.Children [
+                    Grid.grid [
+                        Grid.Rows ([ for n in 1..8 -> 50. ] |> List.map GridLength)
+                        Grid.Columns ([ for n in 1..8 -> 50. ] |> List.map GridLength)
+                        Grid.ColumnSpacing 0.
+                        Grid.RowSpacing 0.
+                        Grid.Children [                            
                             for (cell, (colIdx, rowIdx)) in indexedCells do
                                 let bgColor = getCellBgColor cell colIdx rowIdx
                                 let borderColor = getCellBorderColor cell
@@ -85,11 +86,11 @@ module App =
                                     gestureRecognizers = [onTap]
                                 ).GridColumn(colIdx).GridRow(rowIdx)
                         ]
-                    )
+                    ]
 
-                    View.Label(model.GameState.Message)
+                    Label.label [ Label.Text model.GameState.Message ]
                 ]
-            )
+            ]
         )
 
     // Note, this declaration is needed if you enable LiveUpdate

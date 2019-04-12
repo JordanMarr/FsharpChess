@@ -9,6 +9,7 @@
     <Compile Include="Chess.FabUI.fs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Fabulous.SimpleElements" Version="0.33.0" />
     <PackageReference Include="Xamarin.Forms" Version="3.4.0.1009999" />
     <PackageReference Include="Xamarin.Essentials" Version="0.6.0-preview" />
     <PackageReference Include="Fabulous.Core" Version="0.33.2" />
