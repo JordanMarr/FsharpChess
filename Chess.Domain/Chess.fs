@@ -197,13 +197,13 @@ module Implementation =
         |> Result.bind (validateNoInterposition gameState)
 
     let isCheck (board: Board) (nextMove: Color) : bool =
-        failwith "Not implemented"
+        false // TODO: Implement
 
     let isCheckmate  (board: Board) (nextMove: Color) : bool =
-        failwith "Not implemented"
+        false // TODO: Implement
 
     let isStalemate  (board: Board) (nextMove: Color) : bool =
-        failwith "Not implemented"
+        false // TODO: Implement
 
     let move (gameState: GameState) (attemptedMove: AttemptedMove) =
         match validateMove gameState attemptedMove with

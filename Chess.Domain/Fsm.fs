@@ -17,7 +17,7 @@ module Fsm =
         | Initialize
         | Move of AttemptedMove
 
-    let update state event =
+    let update event state =
         match state, event with
         | NewGame, _
         | _, Initialize -> 
@@ -41,6 +41,7 @@ module Fsm =
                     let nextMove = Implementation.toggleColor gs.NextMove
                     InProgress
                         { gs with 
+                            Board = board
                             NextMove = nextMove
                             Message =
                                 if Implementation.isCheck board gs.NextMove

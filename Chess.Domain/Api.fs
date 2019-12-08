@@ -9,10 +9,10 @@ module Api =
     
     /// cellStr ex: "{ coord: "A1", piece { rank: "Bishop", color: "White" }
     let deserializeCoord (cellStr: string) : Cell = 
-        let colMap = List.zip ["A"; "B"; "C"; "D"; "E"; "F"; "G"; "H";] Column.List |> Map.ofList
-        let rowMap = List.zip ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8";] Row.List |> Map.ofList
+        let colMap = List.zip ['A'; 'B'; 'C'; 'D'; 'E'; 'F'; 'G'; 'H';] Column.List |> Map.ofList
+        let rowMap = List.zip ['1'; '2'; '3'; '4'; '5'; '6'; '7'; '8';] Row.List |> Map.ofList
         match cellStr.ToCharArray() with
-        | [| col; row |] -> { Col = colMap.[col.ToString()]; Row = rowMap.[row.ToString()] }
+        | [| col; row |] -> { Col = colMap.[col]; Row = rowMap.[row] }
         | _ -> failwith "Invalid cell"
     
     let serializeCell cell =
