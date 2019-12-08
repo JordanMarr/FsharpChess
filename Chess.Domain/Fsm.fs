@@ -5,53 +5,50 @@ module Fsm =
     open Entities
 
     // Aliases
-    type NextMove = Color
     type Winner = Color
-    type Message = string
-    type TotalMoves = int
 
     type State = 
-        | InProgress of Board * NextMove * TotalMoves * Message
+        | NewGame
+        | InProgress of GameState
         | Checkmate of Board * Winner
         | Stalemate of Board
 
     type Event =
         | Initialize
-        | Move of Cell * Cell
+        | Move of AttemptedMove
 
     let update state event =
         match state, event with
+        | NewGame, _
         | _, Initialize -> 
-            let gs = Implementation.initGame()
-            InProgress (gs.Board, gs.NextMove, 0, gs.Message)
+            Implementation.initGame() |> InProgress
 
-        | InProgress (board, thisMove, totalMoves, _), Move (fromCell, toCell) ->
-            let gs = { Board = board; NextMove = thisMove; Message = "" }
-            let attemptedMove = { FromCell = fromCell; ToCell = toCell }
-
+        | InProgress gs, Move attemptedMove ->
             match Implementation.validateMove gs attemptedMove with
             | Ok validatedMove -> 
                 // Update board
-                let board = Implementation.updateBoard board validatedMove
+                let board = Implementation.updateBoard gs.Board validatedMove
 
                 // Evaluate board
-                if Implementation.isCheckmate board thisMove then
-                    let winner = thisMove
+                if Implementation.isCheckmate board gs.NextMove then
+                    let winner = gs.NextMove
                     Checkmate (board, winner)
 
-                elif Implementation.isStalemate board thisMove then
+                elif Implementation.isStalemate board gs.NextMove then
                     Stalemate board
 
                 else
-                    let nextMove = Implementation.toggleColor thisMove
-                    let msg = 
-                        if Implementation.isCheck board thisMove
-                        then sprintf "Check!  %A moves next." nextMove
-                        else sprintf "%A moves next." nextMove
-                    InProgress (board, nextMove, totalMoves + 1, sprintf "%A moves next." msg)
+                    let nextMove = Implementation.toggleColor gs.NextMove
+                    InProgress
+                        { gs with 
+                            NextMove = nextMove
+                            Message =
+                                if Implementation.isCheck board gs.NextMove
+                                then sprintf "Check!  %A moves next." nextMove
+                                else sprintf "%A moves next." nextMove }
 
             | Error errorMessage ->
-                InProgress (board, thisMove, totalMoves, errorMessage)
+                InProgress { gs with Message = errorMessage }
                 
         | Checkmate (board, winner), _ ->
             Checkmate (board, winner)
