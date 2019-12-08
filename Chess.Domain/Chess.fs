@@ -14,8 +14,12 @@ module Entities =
     type GameProgress = | InProgress | WhiteWins | BlackWins
     type GameState = { Board: Board; NextMove: Color; Message: string }
     type AttemptedMove = { FromCell: Cell; ToCell: Cell }
-    type Move = { FromPiece: Piece; FromCell: Cell; ToCell: Cell }
-    
+    type Move = { FromPiece: Piece; FromCell: Cell; ToCell: Cell }    
+
+    type NextMove = Color
+    type Winner = Color
+    type ErrorMessage = string
+
 module Implementation =
     open Entities
 
@@ -184,7 +188,7 @@ module Implementation =
         | _ -> 
             board.Add(move.FromCell, None).Add(move.ToCell, Some (fromPieceColor, fromPieceRank))
 
-    let updateNextMoveColor color = 
+    let toggleColor color = 
         match color with
         | Black -> White
         | White -> Black
@@ -196,13 +200,75 @@ module Implementation =
         |> Result.bind (validateMoveShape gameState)
         |> Result.bind (validateNoInterposition gameState)
 
+    let isCheck (board: Board) (nextMove: Color) : bool =
+        failwith "Not implemented"
+
+    let isCheckmate  (board: Board) (nextMove: Color) : bool =
+        failwith "Not implemented"
+
+    let isStalemate  (board: Board) (nextMove: Color) : bool =
+        failwith "Not implemented"
+
     let move (gameState: GameState) (attemptedMove: AttemptedMove) =
         let validatedMove = validateMove gameState attemptedMove
         match validatedMove with
         | Ok move -> 
             { gameState with 
                         Board = updateBoard gameState.Board move
-                        NextMove = updateNextMoveColor(gameState.NextMove) 
+                        NextMove = toggleColor(gameState.NextMove) 
                         Message = "" }
         | Error msg ->
             { gameState with Message = msg }
+
+module ChessFSM =
+    open Entities
+
+    type State = 
+        | NewGame
+        | InProgress of Board * NextMove
+        | InvalidMove of Board * NextMove * ErrorMessage
+        | Check of Board * NextMove
+        | Checkmate of Board * Winner
+        | Stalemate of Board
+
+    type Event =
+        | Initialize
+        | Move of Cell * Cell
+
+    let update state event =
+        match state, event with
+        | NewGame, Initialize -> 
+            let gs = Implementation.initGame()
+            InProgress (gs.Board, gs.NextMove)
+
+        | InProgress (board, nextMove), Move (fromCell, toCell) ->
+            let adaptedGS = { Board = board; NextMove = nextMove; Message = "" }
+            let attemptedMove = { FromCell = fromCell; ToCell = toCell }
+
+            match Implementation.validateMove adaptedGS attemptedMove with
+            | Ok move -> 
+                let board = Implementation.updateBoard board move
+                let nextMove = Implementation.toggleColor(nextMove)
+
+                if Implementation.isCheck board nextMove then 
+                    let nextMove = Implementation.toggleColor(nextMove)
+                    Check (board, nextMove)
+            
+                elif Implementation.isCheckmate board nextMove then
+                    let winner = nextMove
+                    Checkmate (board, winner)
+
+                elif Implementation.isStalemate board nextMove then
+                    Stalemate board
+
+                else
+                    InProgress (board, nextMove)
+
+            | Error errorMsg ->
+                InvalidMove (board, nextMove, errorMsg)
+
+        //| Check (board, nextMove), Move (fromCell, toCell) ->
+
+
+        | _ ->
+            failwith "Not implemented"
