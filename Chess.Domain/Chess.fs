@@ -14,12 +14,8 @@ module Entities =
     type GameProgress = | InProgress | WhiteWins | BlackWins
     type GameState = { Board: Board; NextMove: Color; Message: string }
     type AttemptedMove = { FromCell: Cell; ToCell: Cell }
-    type Move = { FromPiece: Piece; FromCell: Cell; ToCell: Cell }    
-
-    type NextMove = Color
-    type Winner = Color
-    type ErrorMessage = string
-
+    type ValidatedMove = { FromPiece: Piece; FromCell: Cell; ToCell: Cell }    
+    
 module Implementation =
     open Entities
 
@@ -47,7 +43,7 @@ module Implementation =
             NextMove = White; 
             Message = "Welcome to F# Chess!" }
 
-    let validateFromPieceTurn gameState (attemptedMove: AttemptedMove) : Result<Move, string> =
+    let validateFromPieceTurn gameState (attemptedMove: AttemptedMove) : Result<ValidatedMove, string> =
         match gameState.Board.[attemptedMove.FromCell] with
         | Some (fromColor, fromRank) -> 
             if fromColor = gameState.NextMove
@@ -84,7 +80,7 @@ module Implementation =
         let rowIdx = Row.List |> List.findIndex (fun r -> r = cell.Row)
         (colIdx, rowIdx)
         
-    let validateMoveShape gameState move : Result<Move, string> =
+    let validateMoveShape gameState move : Result<ValidatedMove, string> =
         let (fromPieceColor, fromPieceRank) = move.FromPiece
         let toPieceOpt = gameState.Board.Item move.ToCell
                 
@@ -180,7 +176,7 @@ module Implementation =
             then Ok move
             else Error "Another piece is blocking this move"
                     
-    let updateBoard (board: Board) move =
+    let updateBoard (board: Board) (move: ValidatedMove) : Board =
         let fromPieceColor, fromPieceRank = move.FromPiece
         match fromPieceRank with
         | Pawn pi ->
@@ -210,65 +206,11 @@ module Implementation =
         failwith "Not implemented"
 
     let move (gameState: GameState) (attemptedMove: AttemptedMove) =
-        let validatedMove = validateMove gameState attemptedMove
-        match validatedMove with
-        | Ok move -> 
+        match validateMove gameState attemptedMove with
+        | Ok validatedMove -> 
             { gameState with 
-                        Board = updateBoard gameState.Board move
+                        Board = updateBoard gameState.Board validatedMove
                         NextMove = toggleColor(gameState.NextMove) 
                         Message = "" }
         | Error msg ->
             { gameState with Message = msg }
-
-module ChessFSM =
-    open Entities
-
-    type State = 
-        | NewGame
-        | InProgress of Board * NextMove
-        | InvalidMove of Board * NextMove * ErrorMessage
-        | Check of Board * NextMove
-        | Checkmate of Board * Winner
-        | Stalemate of Board
-
-    type Event =
-        | Initialize
-        | Move of Cell * Cell
-
-    let update state event =
-        match state, event with
-        | NewGame, Initialize -> 
-            let gs = Implementation.initGame()
-            InProgress (gs.Board, gs.NextMove)
-
-        | InProgress (board, nextMove), Move (fromCell, toCell) ->
-            let adaptedGS = { Board = board; NextMove = nextMove; Message = "" }
-            let attemptedMove = { FromCell = fromCell; ToCell = toCell }
-
-            match Implementation.validateMove adaptedGS attemptedMove with
-            | Ok move -> 
-                let board = Implementation.updateBoard board move
-                let nextMove = Implementation.toggleColor(nextMove)
-
-                if Implementation.isCheck board nextMove then 
-                    let nextMove = Implementation.toggleColor(nextMove)
-                    Check (board, nextMove)
-            
-                elif Implementation.isCheckmate board nextMove then
-                    let winner = nextMove
-                    Checkmate (board, winner)
-
-                elif Implementation.isStalemate board nextMove then
-                    Stalemate board
-
-                else
-                    InProgress (board, nextMove)
-
-            | Error errorMsg ->
-                InvalidMove (board, nextMove, errorMsg)
-
-        //| Check (board, nextMove), Move (fromCell, toCell) ->
-
-
-        | _ ->
-            failwith "Not implemented"
