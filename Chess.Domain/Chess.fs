@@ -144,33 +144,33 @@ module Implementation =
         | Pawn hasMoved -> validatePawn hasMoved    
     
     let validateNoInterposition gameState move =
-        let fromColor, fromRank = move.FromPiece
-
-        match fromRank with
-        | Knight -> Ok move
+        match move.FromPiece with
+        | color, Knight -> Ok move
         | _ -> 
             let xDelta = getHorizDist move.FromCell move.ToCell
             let yDelta = getVertDist move.FromCell move.ToCell
 
             let normalize n = if n > 0 then 1 elif n < 0 then -1 else 0
-            let addVectors v1 v2 = (fst v1 + fst v2, snd v1 + snd v2)
+            let addVectors (x1, y1) (x2, y2) = (x1 + x2, y1 + y2)
             let unitVector = (normalize xDelta, normalize yDelta)
 
             let rec moveSeq startCell vector = 
                 seq {
-                    let nextCell = startCell
-                                   |> getCoords
-                                   |> addVectors vector
-                                   |> tryGetCell
+                    let nextCell = 
+                        startCell
+                        |> getCoords
+                        |> addVectors vector
+                        |> tryGetCell
                 
                     if nextCell.IsSome then
                         yield nextCell.Value
                         yield! moveSeq nextCell.Value vector
                 }    
 
-            let valid = moveSeq move.FromCell unitVector 
-                        |> Seq.takeWhile (fun nextCell -> nextCell <> move.ToCell)
-                        |> Seq.forall (fun nextCell -> gameState.Board.[nextCell].IsNone)
+            let valid = 
+                moveSeq move.FromCell unitVector 
+                |> Seq.takeWhile (fun nextCell -> nextCell <> move.ToCell)
+                |> Seq.forall (fun nextCell -> gameState.Board.[nextCell].IsNone)
             
             if valid
             then Ok move
@@ -201,8 +201,8 @@ module Implementation =
         match validatedMove with
         | Ok move -> 
             { gameState with 
-                        Board = updateBoard gameState.Board move
-                        NextMove = updateNextMoveColor(gameState.NextMove) 
-                        Message = "" }
+                Board = updateBoard gameState.Board move
+                NextMove = updateNextMoveColor(gameState.NextMove) 
+                Message = "" }
         | Error msg ->
             { gameState with Message = msg }
